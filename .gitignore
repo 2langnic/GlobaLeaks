@@ -9,3 +9,6 @@ debian/globaleaks/
 doc/_build
 
 appliance/*/Vagrantfile
+backend/.settings/org.eclipse.core.resources.prefs
+backend/.pydevproject
+backend/.project
