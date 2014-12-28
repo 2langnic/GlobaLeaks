@@ -28,7 +28,7 @@ class MetaModel(PropertyPublisherMeta):
       in Storm;
     - Provide a default naming for database table.
     """
-    def __init__(cls, name, bases, attrs):
+    def __init__(self, name, bases, attrs):
         # guess public attributes, as they define the object.
         public_attrs = set([key for key, val in attrs.iteritems()
         # it is not private
@@ -41,30 +41,30 @@ class MetaModel(PropertyPublisherMeta):
         for base in bases:
             public_attrs |= getattr(base, '_public_attrs', set())
         # # guess attributes types magically instead of specifying them.
-        # if not hasattr(cls, 'int_keys'):
-        #     cls.int_keys = [key for key in public_attrs
+        # if not hasattr(self, 'int_keys'):
+        #     self.int_keys = [key for key in public_attrs
         #                     if isinstance(attrs[key], Int)]
-        # if not hasattr(cls, 'bool_keys'):
+        # if not hasattr(self, 'bool_keys'):
         #     bool_keys = [key for key in public_attrs
         #                  if isinstance(attrs[key], Bool)])
-        # if not hasattr(cls, 'localized_strings'):
+        # if not hasattr(self, 'localized_strings'):
         #     localized_strings = set([key for key in public_attrs
         #                              if isinstance(attrs[key], L10NUnicode])
-        #     cls.localized_strings = list(localized_strings)
-        # if not hasattr(cls, 'unicode_keys'):
+        #     self.localized_strings = list(localized_strings)
+        # if not hasattr(self, 'unicode_keys'):
         #     unicode_keys = set([key for key in public_attrs
         #                         if isinstance(attrs[key], Unicode)])
-        #     cls.unicode_keys = list(unicode_keys - localized_strings)
+        #     self.unicode_keys = list(unicode_keys - localized_strings)
         # if not provided, set storm_table's name to the class name.
-        if not hasattr(cls, '__storm_table__'):
-            cls.__storm_table__ = cls.__name__.lower()
+        if not hasattr(self, '__storm_table__'):
+            self.__storm_table__ = self.__name__.lower()
         # if storm_table is none, this means the model is abstract and no table
         # shall be created for it.
-        elif cls.__storm_table__ is None:
-            del cls.__storm_table__
+        elif self.__storm_table__ is None:
+            del self.__storm_table__
         # populate class attributes with the inferred new inormations.
-        cls._public_attrs = public_attrs
-        return super(MetaModel, cls).__init__(name, bases, attrs)
+        self._public_attrs = public_attrs
+        return super(MetaModel, self).__init__(name, bases, attrs)
 
 # L10NUnicode = type('L10NUnicode', (Unicode, ), {})
 
