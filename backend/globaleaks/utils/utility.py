@@ -79,7 +79,7 @@ def deferred_sleep(timeout):
         d.callback(True)
 
     d = Deferred()
-    reactor.callLater(timeout, callbackDeferred)
+    reactor.callLater(timeout, callbackDeferred)  # @UndefinedVariable
     return d
 
 def log_encode_html(s):

@@ -853,4 +853,4 @@ class transact_ro(transact):
     readonly = True
 
 transact.tp.start()
-reactor.addSystemEventTrigger('after', 'shutdown', transact.tp.stop)
+reactor.addSystemEventTrigger('after', 'shutdown', transact.tp.stop)  # @UndefinedVariable

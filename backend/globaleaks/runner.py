@@ -39,11 +39,11 @@ def start_asynchronous():
     #  - first argument is the first run delay in seconds
     #  - second argument is the function that starts the schedule
     #  - third argument is the schedule period in seconds
-    reactor.callLater(0, session_management.start, GLSetting.session_management_minutes_delta * 60)
-    reactor.callLater(10, delivery.start, GLSetting.delivery_seconds_delta)
-    reactor.callLater(20, notification.start, GLSetting.notification_minutes_delta * 60)
-    reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)
-    reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)
+    reactor.callLater(0, session_management.start, GLSetting.session_management_minutes_delta * 60)  # @UndefinedVariable
+    reactor.callLater(10, delivery.start, GLSetting.delivery_seconds_delta)  # @UndefinedVariable
+    reactor.callLater(20, notification.start, GLSetting.notification_minutes_delta * 60)  # @UndefinedVariable
+    reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)  # @UndefinedVariable
+    reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)  # @UndefinedVariable
 
 
     # anti flood protection, anomaly collection, stats
@@ -51,8 +51,8 @@ def start_asynchronous():
     anomaly = statistics_sched.AnomaliesSchedule()
     stats = statistics_sched.StatisticsSchedule()
 
-    reactor.callLater(0, resource_check.start, GLSetting.anomaly_seconds_delta)
-    reactor.callLater(30, anomaly.start, GLSetting.anomaly_seconds_delta)
+    reactor.callLater(0, resource_check.start, GLSetting.anomaly_seconds_delta)  # @UndefinedVariable
+    reactor.callLater(30, anomaly.start, GLSetting.anomaly_seconds_delta)  # @UndefinedVariable
 
 
     # This operation, 'stats' has to be delayed (and executed in the minutes
@@ -61,7 +61,7 @@ def start_asynchronous():
 
     current_time = datetime_now()
     delay = (60 * 60) - (current_time.minute * 60) - current_time.second
-    reactor.callLater( # GLSetting.stats_minutes_delta * 60,
+    reactor.callLater( # GLSetting.stats_minutes_delta * 60, @UndefinedVariable
                       # stats.start, GLSetting.stats_minutes_delta * 60)
                 # more verbose approach to stats
                 delay, stats.start, 60 * 60)
