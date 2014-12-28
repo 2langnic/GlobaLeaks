@@ -37,7 +37,7 @@ class NcursesCli:
         self.myscreen.clear()
         self.myscreen.addstr(3, 5, "Press a key to exit")
         self.myscreen.getch()
-        curses.endwin()
+        curses.endwin()  # @UndefinedVariable
 
     def select_context(self, contexts, node_name):
 

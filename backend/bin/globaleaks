@@ -210,7 +210,7 @@ GLSetting.parser.add_option("-v", "--version", action='store_true',
 # here the options are parsed, because sys.argv array is whack below
 (GLSetting.cmdline_options, args) = GLSetting.parser.parse_args()
 
-if GLSetting.cmdline_options.version:
+if GLSetting.cmdline_options.version:  # @UndefinedVariable
     print "GlobaLeaks Version:", GLSetting.version_string
     print "GlobaLeaks DB version:", DATABASE_VERSION
     quit()
@@ -220,11 +220,11 @@ GLSetting.load_cmdline_options()
 if GLSetting.start_clean:
     if query_yes_no("Globaleaks --start-clean is going to delete %s\nAre you sure?" % GLSetting.working_path, "no"):
         GLSetting.remove_directories()
-elif GLSetting.cmdline_options.kill:
+elif GLSetting.cmdline_options.kill:  # @UndefinedVariable
     try:
         with open(GLSetting.pidfile_path, "r") as fd:
             target_pid = int(fd.read())
-        os.kill(target_pid, GLSetting.cmdline_options.kill)
+        os.kill(target_pid, GLSetting.cmdline_options.kill)  # @UndefinedVariable
         os.remove(GLSetting.pidfile_path)
     except Exception as excep:
         print "Unable kill PID found in %s: kill option ignored (%s)" %\

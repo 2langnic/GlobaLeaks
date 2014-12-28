@@ -28,7 +28,8 @@ GLBackendAPIFactory = web.Application(api.spec, **settings)
 GLBackendAPIFactory.protocol = GLHTTPServer
 
 for ip in GLSetting.bind_addresses:
-    GLBackendAPI = internet.TCPServer(GLSetting.bind_port, GLBackendAPIFactory, interface=ip)
+    #Marked as undefined, see https://twistedmatrix.com/documents/14.0.0/core/howto/application.html
+    GLBackendAPI = internet.TCPServer(GLSetting.bind_port, GLBackendAPIFactory, interface=ip)  # @UndefinedVariable
     GLBackendAPI.setServiceParent(application)
 
 # define exit behaviour

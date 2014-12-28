@@ -6,5 +6,5 @@ xeger = _default_instance.xeger
 
 #This allows convenience methods from rstr to be accessed at the package level.
 #Without requiring the user to instantiate an Rstr() object.
-for alpha in _default_instance._alphabets.keys():
+for alpha in _default_instance._alphabets.keys():  # @UndefinedVariable
     globals()[alpha] = getattr(_default_instance, alpha)

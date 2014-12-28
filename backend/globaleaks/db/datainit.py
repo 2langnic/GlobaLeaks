@@ -199,20 +199,20 @@ def apply_cli_options(store):
                 print "[+] %s public site in the DB: %s" % (verb, composed_t2w_url)
 
             verb = "Overwritting"
-
-    if GLSetting.cmdline_options.public_website:
-        if not re.match(requests.https_url_regexp, GLSetting.cmdline_options.public_website):
-            print "[!!] Invalid public site: %s: Ignored" % GLSetting.cmdline_options.public_website
+    #Marked as undefined because variables from cmdline are only available at runtime
+    if GLSetting.cmdline_options.public_website:  # @UndefinedVariable
+        if not re.match(requests.https_url_regexp, GLSetting.cmdline_options.public_website):  # @UndefinedVariable
+            print "[!!] Invalid public site: %s: Ignored" % GLSetting.cmdline_options.public_website  # @UndefinedVariable
         else:
-            print "[+] %s public site in the DB: %s" % (verb, GLSetting.cmdline_options.public_website)
-            accepted.update({ 'public_site' : unicode(GLSetting.cmdline_options.public_website) })
+            print "[+] %s public site in the DB: %s" % (verb, GLSetting.cmdline_options.public_website)  # @UndefinedVariable
+            accepted.update({ 'public_site' : unicode(GLSetting.cmdline_options.public_website) })  # @UndefinedVariable
 
-    if GLSetting.cmdline_options.hidden_service:
-        if not re.match(requests.hidden_service_regexp, GLSetting.cmdline_options.hidden_service):
-            print "[!!] Invalid hidden service: %s: Ignored" % GLSetting.cmdline_options.hidden_service
+    if GLSetting.cmdline_options.hidden_service:  # @UndefinedVariable
+        if not re.match(requests.hidden_service_regexp, GLSetting.cmdline_options.hidden_service):  # @UndefinedVariable
+            print "[!!] Invalid hidden service: %s: Ignored" % GLSetting.cmdline_options.hidden_service  # @UndefinedVariable
         else:
-            print "[+] %s hidden service in the DB: %s" % (verb, GLSetting.cmdline_options.hidden_service)
-            accepted.update({ 'hidden_service' : unicode(GLSetting.cmdline_options.hidden_service) })
+            print "[+] %s hidden service in the DB: %s" % (verb, GLSetting.cmdline_options.hidden_service)  # @UndefinedVariable
+            accepted.update({ 'hidden_service' : unicode(GLSetting.cmdline_options.hidden_service) })  # @UndefinedVariable
 
     if accepted:
         node = store.find(Node).one()

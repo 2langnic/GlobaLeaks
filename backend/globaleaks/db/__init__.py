@@ -51,7 +51,8 @@ def create_tables(create_node=True):
     Override transactor for testing.
     """
     if GLSetting.db_type == 'sqlite':
-        db_path = GLSetting.db_uri.replace('sqlite:', '').split('?', 1)[0]
+        #Marked as undefined because of used string function which could not be found be static code analysis
+        db_path = GLSetting.db_uri.replace('sqlite:', '').split('?', 1)[0]  # @UndefinedVariable
         if os.path.exists(db_path):
             return succeed(None)
 
@@ -197,7 +198,8 @@ def check_schema_version():
     db_file = GLSetting.db_uri
 
     if GLSetting.db_type == 'sqlite':
-        db_file = GLSetting.db_uri.replace('sqlite:', '')
+        #Marked as undefined because of used string function which could not be found be static code analysis
+        db_file = GLSetting.db_uri.replace('sqlite:', '')  # @UndefinedVariable
 
         if not os.path.exists(db_file):
             return True
@@ -213,7 +215,8 @@ def check_schema_version():
             comma_number = "".join(sqlfile).count(',')
 
         zstorm = ZStorm()
-        db_uri = GLSetting.db_uri.replace("?foreign_keys=O", "")
+        #Marked as undefined because of used string function which could not be found be static code analysis
+        db_uri = GLSetting.db_uri.replace("?foreign_keys=O", "")  # @UndefinedVariable
         zstorm.set_default_uri(GLSetting.store_name, db_uri)
         store = zstorm.get(GLSetting.store_name)
 

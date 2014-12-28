@@ -9,6 +9,7 @@ from twisted.python.failure import Failure
 
 from globaleaks.utils.utility import log
 from globaleaks.utils.mailutils import mail_exception
+import sys
 
 class GLJob(task.LoopingCall):
 

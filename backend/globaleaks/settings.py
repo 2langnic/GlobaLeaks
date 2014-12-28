@@ -53,7 +53,8 @@ class SQLite(storm.databases.sqlite.Database):
 
     def raw_connect(self):
         # See the story at the end to understand why we set isolation_level.
-        raw_connection = sqlite.connect(self._filename, timeout=self._timeout,
+        # Marked as undefined variable because it is just copied from the file sqlite.py from the twisted package
+        raw_connection = sqlite.connect(self._filename, timeout=self._timeout,  # @UndefinedVariable
                                         isolation_level=None)
         if self._synchronous is not None:
             raw_connection.execute("PRAGMA synchronous = %s" %

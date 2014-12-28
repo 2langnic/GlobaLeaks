@@ -48,4 +48,5 @@ class TestFixtures(helpers.TestGL):
         self.assertEqual(fixture['fields']['mockattr1'], 'hello world!')
         self.assertEqual(fixture['fields']['mockattr2'], 1)
         self.assertEqual(set(fixture['fields']),
-            models.Model._public_attrs | {'mockattr1', 'mockattr2', 'mockattr3'})
+            #Marked as undefined variable because could not be found due to static code analysis (see: http://en.wikibooks.org/wiki/Python_Programming/Metaclasses)
+            models.Model._public_attrs | {'mockattr1', 'mockattr2', 'mockattr3'})  # @UndefinedVariable
