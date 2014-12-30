@@ -618,27 +618,30 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
 }).
   factory('passwordWatcher', ['$parse', function($parse) {
     return function(scope, password) {
-      /** This is used to watch the new password and check that is 
-       *  effectively the same. Sets a local variable mismatch_password.
-       *
+      /** This is used to watch the new password and check that it matches the
+       *  complexity criterias.
        *  @param {obj} scope the scope under which we should register watchers
        *                     and insert the mismatch_password field.
-       *  @param {string} old_password the old password model name.
-       *  @param {string} password the new password model name.
-       *  @param {string} check_password need to be equal to the new password.
+       *  @param {string} password the new password.
        **/
       scope.mismatch_password = false;
       scope.unsafe_password = false;
       scope.pwdValidLength = true;
       scope.pwdHasLetter = true;
+      scope.pwdHasSmallLetter = true;
+      scope.pwdHasBigLetter = true;
       scope.pwdHasNumber = true;
+      scope.pwdHasSpecialCharacter = true;
 
       var validatePasswordChange = function () {
         if (scope.$eval(password) !== undefined && scope.$eval(password) != '') {
-          scope.pwdValidLength = ( scope.$eval(password)).length >= 8;
-          scope.pwdHasLetter = ( /[A-z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdValidLength = ( scope.$eval(password)).length >= 10;
+          scope.pwdHasSmallLetter = ( /[a-z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdHasBigLetter = ( /[A-Z]/.test(scope.$eval(password))) ? true : false;
           scope.pwdHasNumber = ( /\d/.test(scope.$eval(password))) ? true : false;
-          scope.unsafe_password = !(scope.pwdValidLength && scope.pwdHasLetter && scope.pwdHasNumber);
+	  scope.pwdHasSpecialCharacter = ( /[^A-Za-z0-9]/.test(scope.$eval(password))) ? true : false;
+          scope.unsafe_password = !(scope.pwdValidLength && scope.pwdHasSmallLetter && scope.pwdHasBigLetter && scope.pwdHasNumber && 
+          scope.pwdHasSpecialCharacter);
         } else {
           /*
            * This values permits to not show errors when
@@ -647,7 +650,10 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
           scope.unsafe_password = false;
           scope.pwdValidLength = true;
           scope.pwdHasLetter = true;
+          scope.pwdHasSmallLetter = true;
+          scope.pwdHasBigLetter = true;
           scope.pwdHasNumber = true;
+          scope.pwdHasSpecialCharacter = true;
         }
       };
 
@@ -660,7 +666,8 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
   factory('changePasswordWatcher', ['$parse', function($parse) {
     return function(scope, old_password, password, check_password) {
       /** This is used to watch the new password and check that is 
-       *  effectively the same. Sets a local variable mismatch_password.
+       *  effectively the same and matches the complexity criterias.
+       *  Sets a local variable mismatch_password.
        *
        *  @param {obj} scope the scope under which we should register watchers
        *                     and insert the mismatch_password field.
@@ -677,15 +684,21 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
 
       scope.pwdValidLength = true;
       scope.pwdHasLetter = true;
+      scope.pwdHasSmallLetter = true;
+      scope.pwdHasBigLetter = true;
       scope.pwdHasNumber = true;
+      scope.pwdHasSpecialCharacter = true;
 
       var validatePasswordChange = function () {
 
         if (scope.$eval(password) !== undefined && scope.$eval(password) != '') {
-          scope.pwdValidLength = ( scope.$eval(password)).length >= 8;
-          scope.pwdHasLetter = ( /[A-z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdValidLength = ( scope.$eval(password)).length >= 10;
+          scope.pwdHasSmallLetter = ( /[a-z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdHasBigLetter = ( /[A-Z]/.test(scope.$eval(password))) ? true : false;
           scope.pwdHasNumber = ( /\d/.test(scope.$eval(password))) ? true : false;
-          scope.unsafe_password = !(scope.pwdValidLength && scope.pwdHasLetter && scope.pwdHasNumber);
+	  scope.pwdHasSpecialCharacter = ( /[^A-Za-z0-9]/.test(scope.$eval(password))) ? true : false;
+          scope.unsafe_password = !(scope.pwdValidLength && scope.pwdHasSmallLetter && scope.pwdHasBigLetter && scope.pwdHasNumber && 
+          scope.pwdHasSpecialCharacter);
         } else {
           /*
            * This values permits to not show errors when
@@ -694,7 +707,10 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
           scope.unsafe_password = false;
           scope.pwdValidLength = true;
           scope.pwdHasLetter = true;
+          scope.pwdHasSmallLetter = true;
+          scope.pwdHasBigLetter = true;
           scope.pwdHasNumber = true;
+          scope.pwdHasSpecialCharacter = true;
         }
 
         if (scope.$eval(password) === undefined ||
