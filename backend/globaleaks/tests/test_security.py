@@ -72,6 +72,22 @@ class TestPasswordManagement(unittest.TestCase):
             hashed2,
             binascii.b2a_hex(scrypt.hash(str(second_pass), dummy_salt) )
         )
+        
+    def test_long_passwords(self):
+        #verifies that a long password is correct saved (see @ test_change_password)
+        dummy_salt_input = "xxxxxxxx"
+        first_pass = helpers.VALID_PASSWORD1
+        second_pass = helpers.VALID_LONG_PASSWORD
+        dummy_salt = get_salt(dummy_salt_input)
+
+        hashed1 = binascii.b2a_hex(scrypt.hash(str(first_pass), dummy_salt))
+
+        hashed2 = change_password(hashed1, first_pass, second_pass, dummy_salt_input)
+
+        self.assertEqual(
+            hashed2,
+            binascii.b2a_hex(scrypt.hash(str(second_pass), dummy_salt) )
+        )
 
     def test_pass_hash_with_0_len_pass_must_fail(self):
         dummy_password = ""
