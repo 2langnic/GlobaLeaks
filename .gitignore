@@ -12,3 +12,14 @@ appliance/*/Vagrantfile
 backend/.settings/org.eclipse.core.resources.prefs
 backend/.pydevproject
 backend/.project
+
+/client/nbproject/private/
+/client/app/nbproject/private/
+*.js~
+*.html~
+*.gitignore~
+client/.project
+client/.project~
+client/.settings/
+glenv/
+client/app/nbproject/
