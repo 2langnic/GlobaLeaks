@@ -50,6 +50,7 @@ spec = [
     (r'/authentication', authentication.AuthenticationHandler),
 
     ## Receiver Tip Handlers ##
+    (r'/rtip/' + uuid_regexp + r'/authentication', rtip.Tip_Authentication),
 
     (r'/rtip/' + uuid_regexp, rtip.RTipInstance),
 

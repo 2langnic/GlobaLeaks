@@ -257,6 +257,7 @@ CREATE TABLE receivertip (
     internaltip_id VARCHAR NOT NULL,
     last_access VARCHAR,
     notification_date VARCHAR,
+    password_set INTEGER NOT NULL,
     mark VARCHAR NOT NULL CHECK (mark IN ('not notified', 'notified', 'unable to notify', 'disabled', 'skipped')),
     receiver_id VARCHAR NOT NULL,
     PRIMARY KEY (id),

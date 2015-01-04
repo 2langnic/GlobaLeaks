@@ -565,6 +565,9 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
   factory('Receivers', ['$resource', function($resource) {
     return $resource('/receivers');
 }]).
+  factory('ReceiverSubmissionAuthentication', ['$resource', function($resource) {
+    return $resource('/rtip/:tip_id/authentication', {tip_id: '@tip_id'}, {update: {method: 'PUT'}});
+}]).
   factory('ReceiverPreferences', ['$resource', function($resource) {
     return $resource('/receiver/preferences', {}, {'update': {method: 'PUT'}});
 }]).
@@ -624,7 +627,6 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
        *                     and insert the mismatch_password field.
        *  @param {string} password the new password.
        **/
-      scope.mismatch_password = false;
       scope.unsafe_password = false;
       scope.pwdValidLength = true;
       scope.pwdHasLetter = true;
@@ -658,6 +660,78 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
       };
 
       scope.$watch(password, function(){
+          validatePasswordChange();
+      }, true);
+
+    }
+}]).
+  factory('doublepasswordWatcher', ['$parse', function($parse) {
+    return function(scope, password, check_password) {
+   /** This is used to watch the new password and check that is 
+       *  effectively the same and matches the complexity criterias.
+       *  Sets a local variable mismatch_password.
+       *
+       *  @param {obj} scope the scope under which we should register watchers
+       *                     and insert the mismatch_password field.
+       *  @param {string} password the new password model name.
+       *  @param {string} check_password need to be equal to the new password.
+       **/
+
+      scope.invalid = true;
+
+      scope.mismatch_password = false;
+      scope.unsafe_password = false;
+
+      scope.pwdValidLength = true;
+      scope.pwdHasLetter = true;
+      scope.pwdHasSmallLetter = true;
+      scope.pwdHasBigLetter = true;
+      scope.pwdHasNumber = true;
+      scope.pwdHasSpecialCharacter = true;
+
+      var validatePasswordChange = function () {
+
+        if (scope.$eval(password) !== undefined && scope.$eval(password) != '') {
+          scope.pwdValidLength = ( scope.$eval(password)).length >= 10;
+          scope.pwdHasSmallLetter = ( /[a-z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdHasBigLetter = ( /[A-Z]/.test(scope.$eval(password))) ? true : false;
+          scope.pwdHasNumber = ( /\d/.test(scope.$eval(password))) ? true : false;
+	  scope.pwdHasSpecialCharacter = ( /[^A-Za-z0-9]/.test(scope.$eval(password))) ? true : false;
+          scope.unsafe_password = !(scope.pwdValidLength && scope.pwdHasSmallLetter && scope.pwdHasBigLetter && scope.pwdHasNumber && 
+          scope.pwdHasSpecialCharacter);
+        } else {
+          /*
+           * This values permits to not show errors when
+           * the user has not yed typed any password.
+           */
+          scope.unsafe_password = false;
+          scope.pwdValidLength = true;
+          scope.pwdHasLetter = true;
+          scope.pwdHasSmallLetter = true;
+          scope.pwdHasBigLetter = true;
+          scope.pwdHasNumber = true;
+          scope.pwdHasSpecialCharacter = true;
+        }
+
+        if (scope.$eval(password) === undefined ||
+          scope.$eval(password) === '' ||
+          scope.$eval(password) === scope.$eval(check_password)) {
+          scope.mismatch_password = false;
+        } else {
+          scope.mismatch_password = true;
+        }
+
+        scope.invalid = scope.$eval(password) === undefined ||
+          scope.$eval(password) === '' ||
+          scope.mismatch_password ||
+          scope.unsafe_password;
+      };
+
+      scope.$watch(password, function(){
+          validatePasswordChange();
+      }, true);
+
+      scope.$watch(check_password, function(){
           validatePasswordChange();
       }, true);
 

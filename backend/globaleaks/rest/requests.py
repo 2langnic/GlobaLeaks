@@ -47,6 +47,10 @@ authDict = {
     'role' : unicode
 }
 
+subKeyDict = {
+    'password' : unicode,
+}
+
 wbSubmissionDesc = {
     'wb_steps' : list,
     'context_id' : uuid_regexp,

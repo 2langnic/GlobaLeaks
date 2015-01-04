@@ -17,6 +17,7 @@ backend/.project
 /client/app/nbproject/private/
 *.js~
 *.html~
+*.sql~
 *.gitignore~
 client/.project
 client/.project~
