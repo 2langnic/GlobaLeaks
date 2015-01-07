@@ -21,18 +21,18 @@ angular.module('resourceServices.authentication', [])
           }
         },
 
-        setExpiration = function(expirationDate) {
+    setExpiration = function(expirationDate) {
           var current_date = new Date();
 
           $rootScope.session_expiration = expirationDate;
-          $timeout(checkExpiration, expirationDate - current_date);
+          $timeout(checkExpiration, expirationDate - (current_date / 1000));
         },
 
         checkExpiration = function() {
           var current_date = new Date();
           var expiration_date = $rootScope.session_expiration;
 
-          if (expiration_date >= current_date) {
+          if ((current_date / 1000) >= expiration_date) {
             var error = {
               'message': 'Session expired!',
                  'code': 401,
@@ -50,7 +50,7 @@ angular.module('resourceServices.authentication', [])
             setExpiration(expiration_date);
           }
         };
-
+        
         $rootScope.login = function(username, password, role, cb) {
           return $http.post('/authentication', {'username': username,
                                                 'password': password,
