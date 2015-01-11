@@ -19,37 +19,7 @@ angular.module('resourceServices.authentication', [])
           if(window.location.protocol === 'https:') {
             $.cookie(name, value, {secure: true});
           }
-        },
-
-    setExpiration = function(expirationDate) {
-          var current_date = new Date();
-
-          $rootScope.session_expiration = expirationDate;
-          $timeout(checkExpiration, expirationDate - (current_date / 1000));
-        },
-
-        checkExpiration = function() {
-          var current_date = new Date();
-          var expiration_date = $rootScope.session_expiration;
-
-          if ((current_date / 1000) >= expiration_date) {
-            var error = {
-              'message': 'Session expired!',
-                 'code': 401,
-                  'url': $location.path()
-            };
-
-            $rootScope.errors.push(error);
-
-            $timeout(function() {
-              $location.path('/login');
-              $location.search('src='+source_path);
-            }, 3000);
-
-          } else {
-            setExpiration(expiration_date);
-          }
-        };
+      };
         
         $rootScope.login = function(username, password, role, cb) {
           return $http.post('/authentication', {'username': username,
@@ -65,8 +35,6 @@ angular.module('resourceServices.authentication', [])
               self.password_change_needed = response.password_change_needed;
 
               var auth_landing_page = "";
-
-              setExpiration(response.session_expiration);
 
               if (role == 'admin') {
                   auth_landing_page = "/admin/landing";
