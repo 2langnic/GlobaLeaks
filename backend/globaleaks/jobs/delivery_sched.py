@@ -84,7 +84,24 @@ def get_receiverfile_by_itip(store, itip_id):
     return rfile_list
 
 
-@transact
+def is_internalfile_associated_with_internaltip(filex):
+    if not filex.internaltip:
+        log.err("Integrity failure: the file %s"
+            "has not an InternalTip assigned (path: %s)" % 
+            (filex.name, filex.file_path))
+        try:
+            os.remove(os.path.join(GLSetting.submission_path, filex.file_path))
+        except OSError as excep:
+            log.err("Unable to remove %s in integrity fixing routine: %s" % (filex.file_path, excep.strerror))
+        key_id = os.path.basename(filex.file_path).split('.')[0]
+        keypath = os.path.join(GLSetting.ramdisk_path, ("%s%s" % (GLSetting.AES_keyfile_prefix, key_id)))
+        try:
+            os.remove(keypath)
+        except OSError as excep:
+            log.err("Unable to delete keyfile %s: %s" % (keypath, excep.strerror))
+        return False
+    return True
+
 def receiverfile_planning(store):
     """
     This function roll over the InternalFile uploaded, extract a path, id and
@@ -101,30 +118,7 @@ def receiverfile_planning(store):
     ifilesmap = {}
 
     for filex in files:
-
-        if not filex.internaltip:
-            log.err("Integrity failure: the file %s"\
-                    "has not an InternalTip assigned (path: %s)" %
-                    (filex.name, filex.file_path) )
-
-            try:
-                os.remove(os.path.join(GLSetting.submission_path, filex.file_path))
-            except OSError as excep:
-                log.err("Unable to remove %s in integrity fixing routine: %s" %
-                    (filex.file_path, excep.strerror) )
-
-            key_id = os.path.basename(filex.file_path).split('.')[0]
-            keypath = os.path.join(GLSetting.ramdisk_path, ("%s%s" % (GLSetting.AES_keyfile_prefix, key_id)))
-
-            try:
-                os.remove(keypath)
-            except OSError as excep:
-                log.err("Unable to delete keyfile %s: %s" % (keypath, excep.strerror))
-
-            # if the file is not associated to any tip it should be
-            # removed to avoid infinite loop
-            store.remove(filex)
-
+        if not is_internalfile_associated_with_internaltip(store, filex):
             continue
 
         # here we select the file which deserve to be processed.
@@ -151,7 +145,7 @@ def receiverfile_planning(store):
 
                 receiver_desc = admin_serialize_receiver(receiver, GLSetting.memory_copy.default_language)
 
-                map_info = {
+                receiverFileInfo = {
                     'receiver' : receiver_desc,
                     'path' : filex.file_path,
                     'size' : filex.size,
@@ -163,7 +157,7 @@ def receiverfile_planning(store):
                 # path, because shall be renamed in .plaintext (in the unlucky case
                 # of receivers without PGP)
                 # AS FIELD, it can be replaced with a dedicated PGP encrypted path
-                ifilesmap[filex.file_path].append(map_info)
+                ifilesmap[filex.file_path].append(receiverFileInfo)
 
         except Exception as excep:
             log.debug("Invalid Storm operation in checking for PGP cap: %s" % excep)
@@ -197,7 +191,7 @@ def fsops_gpg_encrypt(fpath, recipient_gpg):
         raise Exception("Unable to validate key")
 
     filepath = os.path.join(GLSetting.submission_path, fpath)
-
+    # The filepath defines the aes encrypted file and its symmetric key when given to GLSecureFile
     with GLSecureFile(filepath) as f:
         encrypted_file_path, encrypted_file_size = \
             gpoj.encrypt_file(filepath, f, GLSetting.submission_path)
@@ -329,10 +323,14 @@ def do_final_internalfile_update(store, file_path, new_marker, new_path=None):
 
 
 def encrypt_where_available(receivermap):
+
     """
+    This function returns true when all files have been encrypted with pgp
+    and false if one has not an encryption enabled and it is allowed to store files unencrypted and so 
+    a plaintext version has to be created
     @param receivermap:
         [ { 'receiver' : receiver_desc, 'path' : file_path, 'size' : file_size }, .. ]
-    @return: return True if plaintex version of file must be created.
+    @return: return false if plaintext version of file must be created.
     """
 
     retcode = True
@@ -368,6 +366,54 @@ def encrypt_where_available(receivermap):
 
     return retcode
 
+
+@transact
+def create_receiver_file(store,receiver_id,InternalFile_id):
+    
+    receiverfile = ReceiverFile()
+    internalFile = store.find(InternalFile,InternalFile.id ==InternalFile_id).one()
+    
+    
+    receiverfile.downloads = 0
+    receiverfile.receiver_id = receiver_id
+    receiverfile.internalfile_id = internalFile.id
+    receiverfile.internaltip_id = internalFile.internaltip_id
+    receiverfile.file_encryption_nonce = internalFile.file_encryption_nonce
+
+    # Receiver Tip reference
+    rtrf = store.find(ReceiverTip, ReceiverTip.internaltip_id == internalFile.internaltip_id,
+                      ReceiverTip.receiver_id == receiver_id).one()
+    receiverfile.receiver_tip_id = rtrf.id
+
+    # inherited by previous operation and checks
+    receiverfile.file_path = internalFile.file_path
+    receiverfile.size = internalFile.size
+    receiverfile.status = unicode(u'encrypted')
+
+    receiverfile.mark = u'not notified'
+
+    store.add(receiverfile)
+
+@transact
+def create_receiver_files_and_reference_to_receiverTip(store):
+    #Find all internal files which have not been processed up till now
+    files = store.find(InternalFile, InternalFile.mark == u'not processed')
+    
+    for filex in files:
+        # If the file is not associated it is deleted and the next file is checked
+        if not is_internalfile_associated_with_internaltip(filex):
+            # if the file is not associated to any tip it should be
+            # removed to avoid infinite loop
+            store.remove(filex)
+            continue
+        
+        for receiver in filex.internaltip.receivers:
+            create_receiver_file(receiver.id,filex.id)
+            filex.mark = u'ready'
+            
+     
+     
+
 class DeliverySchedule(GLJob):
 
     @inlineCallbacks
@@ -378,13 +424,19 @@ class DeliverySchedule(GLJob):
         """
         try:
             # ==> Submission && Escalation
+            # Here the receiverTips from the Internaltips are created
             info_created_tips = yield tip_creation()
             if info_created_tips:
                 log.debug("Delivery job: created %d tips" % len(info_created_tips))
         except Exception as excep:
             log.err("Exception in asyncronous delivery job: %s" % excep )
             sys.excepthook(*sys.exc_info())
-
+        
+        # Creation of the receiverfiles and referencing them to the receivertip
+        create_receiver_files_and_reference_to_receiverTip()
+        
+        
+        """
         # ==> Files && Files update,
         #     InternalFile is set as 'locked' status
         #     and would be unlocked at the end.
@@ -410,19 +462,21 @@ class DeliverySchedule(GLJob):
 
             plain_path = os.path.join(GLSetting.submission_path, "%s.plain" % xeger(r'[A-Za-z0-9]{16}') )
 
+            # This function returns true when all files have been encrypted with pgp
+            # and false if one has not an encryption enabled and it is allowed to store files unencrypted
             create_plaintextfile = encrypt_where_available(receivermap)
 
-            for rfileinfo in receivermap:
+            for receiverFileInfo in receivermap:
 
-                if not create_plaintextfile and rfileinfo['status'] == u'reference':
-                    rfileinfo['path'] = plain_path
+                if not create_plaintextfile and receiverFileInfo['status'] == u'reference':
+                    receiverFileInfo['path'] = plain_path
 
                 try:
-                    yield receiverfile_create(ifile_path, rfileinfo['path'], rfileinfo['status'],
-                                              rfileinfo['size'], rfileinfo['receiver'])
+                    yield receiverfile_create(ifile_path, receiverFileInfo['path'], receiverFileInfo['status'],
+                                              receiverFileInfo['size'], receiverFileInfo['receiver'])
                 except Exception as excep:
                     log.err("Unable to create ReceiverFile from %s for %s: %s" %
-                            (ifile_path, rfileinfo['receiver']['name'], excep))
+                            (ifile_path, receiverFileInfo['receiver']['name'], excep))
                     continue
 
             if not create_plaintextfile:
@@ -467,4 +521,5 @@ class DeliverySchedule(GLJob):
             # here closes the if/else 'are_all_encrypted'
         # here closes the loop over internalfile mapping
     # here closes operations()
+    """
 

@@ -232,7 +232,8 @@ elif GLSetting.cmdline_options.kill:  # @UndefinedVariable
 
 os.umask(077)
 GLSetting.create_directories()
-GLSetting.cleaning_dead_files()
+#Outcommented due to new encryption
+#GLSetting.cleaning_dead_files()
 
 backend_script = os.path.join(GLSetting.root_path, 'globaleaks', 'backend.py')
 

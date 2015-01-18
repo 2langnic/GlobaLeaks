@@ -24,6 +24,7 @@ from globaleaks.utils.utility import log, acquire_bool
 from globaleaks.settings import GLSetting
 from globaleaks.models import *
 from globaleaks.third_party.rstr import xeger
+from base64 import b64decode, b64encode
 
 
 SALT_LENGTH = (128 / 8) # 128 bits of unique salt
@@ -56,42 +57,21 @@ class GLSecureTemporaryFile(_TemporaryFileWrapper):
         # last argument is 'True' because the file has to be deleted on .close()
         _TemporaryFileWrapper.__init__(self, self.file, self.filepath, True)
 
+    
     def initialize_cipher(self):
-        self.cipher = Cipher(algorithms.AES(self.key), modes.CTR(self.key_counter_nonce), backend=crypto_backend)
+        self.cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(self.key_counter_nonce), backend=crypto_backend)
         self.encryptor = self.cipher.encryptor()
         self.decryptor = self.cipher.decryptor()
 
     def create_key(self):
         """
         Create the AES Key to encrypt uploaded file.
+        Due to changes the aes key has not be created it it just read out of the GLSetting.
+        Nevertheless the keyID for the name of the file and the nonce are created here
         """
-        self.key = os.urandom(GLSetting.AES_key_size)
-
-        self.key_id = xeger(GLSetting.AES_key_id_regexp)
-        self.keypath = os.path.join(GLSetting.ramdisk_path, "%s%s" %
-                                    (GLSetting.AES_keyfile_prefix, self.key_id))
-
-        while os.path.isfile(self.keypath):
-            self.key_id = xeger(GLSetting.AES_key_id_regexp)
-            self.keypath = os.path.join(GLSetting.ramdisk_path, "%s%s" %
-                                    (GLSetting.AES_keyfile_prefix, self.key_id))
-
         self.key_counter_nonce = os.urandom(GLSetting.AES_counter_nonce)
+        self.key_id = xeger(GLSetting.AES_key_id_regexp)
         self.initialize_cipher()
-
-        saved_struct = {
-            'key' : self.key,
-            'key_counter_nonce' : self.key_counter_nonce
-        }
-
-        log.debug("Key initialization at %s" % self.keypath)
-
-        with open(self.keypath, 'w') as kf:
-           pickle.dump(saved_struct, kf)
-
-        if not os.path.isfile(self.keypath):
-            log.err("Unable to write keyfile %s" % self.keypath)
-            raise Exception("Unable to write keyfile %s" % self.keypath)
 
     def avoid_delete(self):
         log.debug("Avoid delete on: %s " % self.filepath)
@@ -142,36 +122,9 @@ class GLSecureFile(GLSecureTemporaryFile):
 
         self.filepath = filepath
 
-        self.key_id = os.path.basename(self.filepath).split('.')[0]
-
-        log.debug("Opening secure file %s with %s" % (self.filepath, self.key_id) )
-
         self.file = open(self.filepath, 'r+b')
 
-        # last argument is 'False' because the file has not to be deleted on .close()
         _TemporaryFileWrapper.__init__(self, self.file, self.filepath, False)
-
-        self.load_key()
-
-    def load_key(self):
-        """
-        Load the AES Key to decrypt uploaded file.
-        """
-        self.keypath = os.path.join(GLSetting.ramdisk_path, ("%s%s" % (GLSetting.AES_keyfile_prefix, self.key_id)))
-
-        try:
-            with open(self.keypath, 'r') as kf:
-                saved_struct = pickle.load(kf)
-
-            self.key = saved_struct['key']
-            self.key_counter_nonce = saved_struct['key_counter_nonce']
-            self.initialize_cipher()
-
-        except Exception as axa:
-            # I'm sorry, those file is a dead file!
-            log.err("The file %s has been encrypted with a lost/invalid key (%s)" % (self.keypath, axa.message))
-            raise axa
-
 
 def directory_traversal_check(trusted_absolute_prefix, untrusted_path):
     """
@@ -274,6 +227,30 @@ def change_password(base64_stored, old_password, new_password, salt_input):
 
     return hash_password(new_password, salt_input)
 
+def encrypt_with_ServerKey (nonce,value):
+    """
+    This is the central encryption function for encrypting with a single AES key.
+    The key used is the GLSessing.mainServerKey
+    @param nonce: the needed nonce, encoded in base64
+    @param value: the value to encrypt
+    @return:
+        the base64 encoded and encrypted version of the value
+    """    
+    cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(nonce)), backend=default_backend())
+    return b64encode(cipher.encryptor().update(value))
+
+def decrypt_with_ServerKey (nonce, encrypted_value):
+    """
+    @see: encrypt_with_Serverkey()
+    The key used for decryption is  the GLSessing.mainServerKey
+    @param nonce: the needed nonce, encoded in base64
+    @param value: the encrypted value encode base64
+    @return:
+        the decrypted version of the encrypted_value
+    """    
+    cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(nonce)), backend=default_backend())
+    returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
+    return returnvalue
 
 class GLBGPG:
     """

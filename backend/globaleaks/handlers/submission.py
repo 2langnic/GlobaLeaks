@@ -21,6 +21,14 @@ from globaleaks.utils.utility import log, utc_future_date, datetime_now, datetim
 from globaleaks.third_party import rstr
 from globaleaks.rest import errors
 
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from encodings.base64_codec import base64_encode
+from pickle import dumps
+import base64
+from base64 import b64encode, b64decode
+import os
+
 def wb_serialize_internaltip(internaltip):
 
     response = {
@@ -283,6 +291,12 @@ def update_submission(store, submission_id, request, finalize, language=GLSettin
             steps = db_get_context_steps(store, context.id, language)
             verify_steps(steps, wb_steps)
 
+        # Encryption
+        # First creation of nonce and saving it encoded in base64
+        submission.wb_steps_nonce = b64encode(os.urandom(GLSetting.AES_counter_nonce))
+        # Then using function from security to encrypt
+        wb_steps = security.encrypt_with_ServerKey(submission.wb_steps_nonce, dumps(wb_steps))
+      
         submission.wb_steps = wb_steps
     except Exception as excep:
         log.err("Submission update: fields validation fail: %s" % excep)

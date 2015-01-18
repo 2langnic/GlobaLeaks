@@ -127,6 +127,8 @@ class GLHTTPServer(HTTPConnection):
                 self.uploaded_file['body'] = self._contentbuffer
                 self.uploaded_file['body_len'] = int(self.content_length)
                 self.uploaded_file['body_filepath'] = self._contentbuffer.filepath
+                # saving of the nonce
+                self.uploaded_file['nonce'] = self._contentbuffer.key_counter_nonce
 
             megabytes = int(self.content_length) / (1024 * 1024)
 

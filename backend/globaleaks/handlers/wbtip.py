@@ -18,6 +18,13 @@ from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.models import WhistleblowerTip, Comment, Message, ReceiverTip
 from globaleaks.rest import errors
 
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+from pickle import loads
+from base64 import b64decode
+from globaleaks import security
+
 
 def wb_serialize_tip(internaltip, language=GLSetting.memory_copy.default_language):
     ret_dict = {
@@ -28,7 +35,7 @@ def wb_serialize_tip(internaltip, language=GLSetting.memory_copy.default_languag
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
-        'wb_steps' : internaltip.wb_steps,
+        'wb_steps' : loads(security.decrypt_with_ServerKey(internaltip.wb_steps_nonce,internaltip.wb_steps)),
         'enable_private_messages' : internaltip.context.enable_private_messages,
         'show_receivers': internaltip.context.show_receivers, 
     }

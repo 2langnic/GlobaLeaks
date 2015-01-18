@@ -76,6 +76,7 @@ CREATE TABLE internalfile (
     name VARCHAR NOT NULL,
     description VARCHAR,
     size INTEGER NOT NULL,
+    file_encryption_nonce VARCHAR,
     internaltip_id VARCHAR NOT NULL,
     FOREIGN KEY(internaltip_id) REFERENCES internaltip(id) ON DELETE CASCADE,
     PRIMARY KEY (id)
@@ -92,6 +93,7 @@ CREATE TABLE receiverfile (
     receiver_id VARCHAR NOT NULL,
     internaltip_id VARCHAR NOT NULL,
     receiver_tip_id VARCHAR NOT NULL,
+    file_encryption_nonce VARCHAR,
     mark VARCHAR NOT NULL CHECK (mark IN ('not notified', 'notified', 'unable to notify', 'disabled', 'skipped')),
     status VARCHAR NOT NULL CHECK (status IN ('reference', 'encrypted', 'unavailable', 'nokey')),
     FOREIGN KEY(internalfile_id) REFERENCES internalfile(id) ON DELETE CASCADE,
@@ -107,6 +109,7 @@ CREATE TABLE internaltip (
     download_limit INTEGER NOT NULL,
     expiration_date VARCHAR NOT NULL,
     wb_steps BLOB,
+    wb_steps_nonce VARCHAR,
     last_activity VARCHAR,
     mark VARCHAR NOT NULL CHECK (mark IN ('submission', 'finalize', 'first', 'second')),
     context_id VARCHAR NOT NULL,

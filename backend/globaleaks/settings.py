@@ -309,6 +309,9 @@ class GLSettingsClass:
         self.debug_option_UUID_human = ""
         self.debug_UUID_human_counter = 0
         self.debug_option_mlockall = False
+        
+        ########### Tests for new encryption
+        self.mainServerKey = "ABCdef78&%ABCdef78&%ABCdef78&%23";
 
 
     def eval_paths(self):

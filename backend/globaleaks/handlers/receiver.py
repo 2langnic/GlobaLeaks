@@ -203,14 +203,16 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
         mo.acquire_storm_object(rtip.internaltip.context)
         single_tip_sum["context_name"] = mo.dump_localized_attr('name', language)
 
-        preview_data = []
+        #TODO: Is previewdata really needed?
+        #preview_data = []
 
-        for s in rtip.internaltip.wb_steps:
-            for f in s['children']:
-                if f['preview']:
-                    preview_data.append(f)
+        #for s in rtip.internaltip.wb_steps:
+        #   for f in s['children']:
+        #      if f['preview']:
+        #         preview_data.append(f)
 
-        single_tip_sum.update({ 'preview' : preview_data })
+        # single_tip_sum.update({ 'preview' : preview_data })
+        
         rtip_summary_list.append(single_tip_sum)
 
     return rtip_summary_list

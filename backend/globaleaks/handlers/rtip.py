@@ -22,8 +22,13 @@ from globaleaks.models import Node, Comment, ReceiverFile, Message, InternalTip
 from globaleaks.rest import errors
 from globaleaks.security import access_tip
 
-def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
+from pickle import loads
+from globaleaks import security
+
+def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):    
     ret_dict = {
         'context_id': internaltip.context.id,
         'creation_date' : datetime_to_ISO8601(internaltip.creation_date),
@@ -31,7 +36,7 @@ def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
-        'wb_steps' : internaltip.wb_steps,
+        'wb_steps' : loads(security.decrypt_with_ServerKey(internaltip.wb_steps_nonce, internaltip.wb_steps)),
         'global_delete' : False,
         # this field "inform" the receiver of the new expiration date that can
         # be set, only if PUT with extend = True is updated
@@ -65,11 +70,13 @@ def receiver_serialize_file(internalfile, receiverfile, receivertip_id):
             'status': receiverfile.status,
             'href' : "/rtip/" + receivertip_id + "/download/" + receiverfile.id,
             # if the ReceiverFile has encrypted status, we append ".pgp" to the filename, to avoid mistake on Receiver side.
-            'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
+            #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
+            'name' : internalfile.name,
             'content_type' : internalfile.content_type,
             'creation_date' : datetime_to_ISO8601(internalfile.creation_date),
             'size': receiverfile.size,
             'downloads': receiverfile.downloads
+            #TODO: Encryption of the filename and perhaps downloadcounter,creation_date and size
       }
 
     else: # == 'unavailable' in this case internal file metadata is returned.
@@ -566,6 +573,7 @@ def get_password_set_for_submission_by_user(store, user_id, tip_id):
 def create_password_for_tip_and_receiver(store, user_id, tip_id, password):
     rtip = access_tip(store, user_id, tip_id)
     rtip.password_set = True
+    #GLSetting.mainServerKey = password
     #TODO: Encrypt the data with the password
     #nothing to be saved (call by reference, see increment_receiver_access_count(store, user_id, tip_id)
     

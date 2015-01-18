@@ -22,6 +22,11 @@ from globaleaks.utils.utility import log, datetime_to_ISO8601
 from globaleaks.rest import errors
 from globaleaks.models import ReceiverFile, InternalTip, InternalFile, WhistleblowerTip
 from globaleaks.security import access_tip
+from base64 import b64encode, b64decode
+
+from cryptography.hazmat.primitives.ciphers import algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers.base import Cipher
 
 def serialize_file(internalfile):
 
@@ -43,10 +48,13 @@ def serialize_receiver_file(receiverfile):
     file_desc = {
         'size' : receiverfile.size,
         'content_type' : internalfile.content_type,
-        'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
+        # Also here renaming
+        #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
+        'name': internalfile.name,
         'creation_date': datetime_to_ISO8601(internalfile.creation_date),
         'downloads' : receiverfile.downloads,
         'path' : receiverfile.file_path,
+        'nonce':receiverfile.file_encryption_nonce,
     }
 
     return file_desc
@@ -68,6 +76,9 @@ def register_file_db(store, uploaded_file, filepath, internaltip_id):
     new_file.size = uploaded_file['body_len']
     new_file.internaltip_id = internaltip_id
     new_file.file_path = filepath
+    #Once again is has to be saved as base64 due to error
+    #Unable to register file in DB: 'ascii' codec can't decode byte 0xb0 in position 0: ordinal not in range(128)
+    new_file.file_encryption_nonce = b64encode(uploaded_file['nonce'])
 
     store.add(new_file)
 
@@ -269,16 +280,17 @@ class Download(BaseHandler):
         self.set_header('Content-Disposition','attachment; filename=\"%s\"' % rfile['name'])
 
         filelocation = os.path.join(GLSetting.submission_path, rfile['path'])
-
+        
+        cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(rfile['nonce'])), backend=default_backend())
         try:
-
-            with open(filelocation, "rb") as requestf:
-                chunk_size = 8192
-                while True:
-                    chunk = requestf.read(chunk_size)
-                    if len(chunk) == 0:
-                        break
-                    self.write(chunk)
+            # https://docs.python.org/2/library/functions.html#open
+            # r read
+            # b binaryfile
+            # size = amount of bytes read, all if no parameter
+            #before here was a splitting but due to the different size of ctr encryption mode and the chunk size 
+            # now directly the whole input is used
+            requestf = open(filelocation, "rb")
+            self.write(cipher.decryptor().update(requestf.read()))
 
         except IOError as srcerr:
             log.err("Unable to open %s: %s " % (filelocation, srcerr.strerror))

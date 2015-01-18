@@ -262,6 +262,7 @@ class InternalTip(Model):
     # receivers = ReferenceSet(InternalTip.id, Receiver.id)
 
     wb_steps = JSON()
+    wb_steps_nonce = Unicode()
     expiration_date = DateTime()
     last_activity = DateTime()
 
@@ -321,6 +322,8 @@ class ReceiverFile(Model):
     internalfile_id = Unicode()
     receiver_id = Unicode()
     receiver_tip_id = Unicode()
+    # Nonce for decryption / encryption
+    file_encryption_nonce = Unicode()
     # internalfile = Reference(ReceiverFile.internalfile_id, InternalFile.id)
     # receiver = Reference(ReceiverFile.receiver_id, Receiver.id)
     # internaltip = Reference(ReceiverFile.internaltip_id, InternalTip.id)
@@ -361,6 +364,7 @@ class InternalFile(Model):
     description = Unicode(validator=longtext_v)
     size = Int()
 
+    file_encryption_nonce = Unicode()
     mark = Unicode()
     _marker = [u'not processed', u'locked', u'ready', u'delivered']
     # 'not processed' = submission time
