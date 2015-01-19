@@ -475,6 +475,7 @@ class Node(Model):
     wizard_done = Bool(default=False)
 
     disable_privacy_badge = Bool(default=False)
+    wb_hide_stats = Bool(default=False)
     disable_security_awareness_badge = Bool(default=False)
     disable_security_awareness_questions = Bool(default=False)
 
@@ -495,7 +496,7 @@ class Node(Model):
     bool_keys = [ 'tor2web_admin', 'tor2web_receiver', 'tor2web_submission',
                   'tor2web_unauth', 'postpone_superpower',
                   'can_delete_submission', 'ahmia', 'allow_unencrypted',
-                  'disable_privacy_badge', 'disable_security_awareness_badge',
+                  'disable_privacy_badge', 'wb_hide_stats', 'disable_security_awareness_badge',
                   'disable_security_awareness_questions', 'enable_custom_privacy_badge' ]
                 # wizard_done is not checked because it's set by the backend
     localized_strings = [ 'description', 'presentation', 'footer', 'subtitle',

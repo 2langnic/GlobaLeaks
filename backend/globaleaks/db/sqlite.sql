@@ -153,6 +153,7 @@ CREATE TABLE node (
     exception_email VARCHAR NOT NULL,
     allow_unencrypted INTEGER NOT NULL,
     disable_privacy_badge INTEGER NOT NULL,
+    wb_hide_stats INTEGER NOT NULL,
     disable_security_awareness_badge INTEGER NOT NULL,
     disable_security_awareness_questions INTEGER NOT NULL,
     enable_custom_privacy_badge INTEGER NOT NULL DEFAULT 0,
