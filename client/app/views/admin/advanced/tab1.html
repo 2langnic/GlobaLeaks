@@ -69,7 +69,7 @@
       <label data-translate>Custom Privacy Badge</label>
       <label data-translate>(Traditional Browser)</label>
       <div>
-        <input class="form-control" data-ng-model="admin.node.custom_privacy_badge_none" type=text" />
+        <input class="form-control" data-ng-model="admin.node.custom_privacy_badge_none" type="text" />
       </div>
     </div>
 
@@ -128,6 +128,13 @@
       <label>
         <input data-ng-model="admin.node.disable_privacy_badge" type="checkbox" />
         <span data-translate>Disable the privacy badge</span>
+      </label>
+    </div>
+    
+    <div class="form-group">
+      <label>
+        <input data-ng-model="admin.node.wb_hide_stats" type="checkbox" />
+        <span data-translate>Hide access stats for whistleblower</span>
       </label>
     </div>
 
