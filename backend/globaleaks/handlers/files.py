@@ -18,7 +18,7 @@ from twisted.internet.defer import inlineCallbacks
 from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.handlers.base import BaseHandler
 from globaleaks.handlers.authentication import transport_security_check, authenticated, unauthenticated
-from globaleaks.utils.utility import log, datetime_to_ISO8601
+from globaleaks.utils.utility import log, datetime_to_ISO8601, datetime_now
 from globaleaks.rest import errors
 from globaleaks.models import ReceiverFile, InternalTip, InternalFile, WhistleblowerTip
 from globaleaks.security import access_tip
@@ -27,14 +27,18 @@ from base64 import b64encode, b64decode
 from cryptography.hazmat.primitives.ciphers import algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers.base import Cipher
+from globaleaks import security
+
+from pickle import dumps,loads
+
 
 def serialize_file(internalfile):
 
     file_desc = {
-        'size' : internalfile.size,
-        'content_type' : internalfile.content_type,
-        'name' : internalfile.name,
-        'creation_date': datetime_to_ISO8601(internalfile.creation_date),
+        'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
+        'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
+        'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
         'id' : internalfile.id,
         'mark' : internalfile.mark,
     }
@@ -44,14 +48,14 @@ def serialize_file(internalfile):
 def serialize_receiver_file(receiverfile):
 
     internalfile = receiverfile.internalfile
-
+    
     file_desc = {
-        'size' : receiverfile.size,
-        'content_type' : internalfile.content_type,
+        'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
+        'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
         # Also here renaming
         #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
-        'name': internalfile.name,
-        'creation_date': datetime_to_ISO8601(internalfile.creation_date),
+        'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
         'downloads' : receiverfile.downloads,
         'path' : receiverfile.file_path,
         'nonce':receiverfile.file_encryption_nonce,
@@ -69,11 +73,24 @@ def register_file_db(store, uploaded_file, filepath, internaltip_id):
         raise errors.TipIdNotFound
 
     new_file = InternalFile()
-    new_file.name = uploaded_file['filename']
     new_file.description = ""
-    new_file.content_type = uploaded_file['content_type']
     new_file.mark = InternalFile._marker[0] # 'not processed'
-    new_file.size = uploaded_file['body_len']
+    # Encryption name
+    new_file.name_nonce = security.get_b64_encoded_nonce()
+    new_file.name = security.encrypt_with_ServerKey(new_file.name_nonce,uploaded_file['filename'])
+    
+    #Encryption contentType
+    new_file.content_type_nonce = security.get_b64_encoded_nonce()
+    new_file.content_type = security.encrypt_with_ServerKey(new_file.content_type_nonce,uploaded_file['content_type'])
+    
+    #Encryption size
+    new_file.size_nonce = security.get_b64_encoded_nonce()
+    new_file.size = security.encrypt_with_ServerKey(new_file.size_nonce,str(uploaded_file['body_len']))
+    # Encryption date
+    new_file.creation_date_nonce = security.get_b64_encoded_nonce()
+    
+    new_file.creation_date = security.encrypt_with_ServerKey(new_file.creation_date_nonce,dumps(datetime_now()))
+    
     new_file.internaltip_id = internaltip_id
     new_file.file_path = filepath
     #Once again is has to be saved as base64 due to error

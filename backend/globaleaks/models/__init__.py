@@ -322,7 +322,11 @@ class ReceiverFile(Model):
     internalfile_id = Unicode()
     receiver_id = Unicode()
     receiver_tip_id = Unicode()
+    
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
     # Nonce for decryption / encryption
+    # This is also saved here because at file download only a receiverfile is present
     file_encryption_nonce = Unicode()
     # internalfile = Reference(ReceiverFile.internalfile_id, InternalFile.id)
     # receiver = Reference(ReceiverFile.receiver_id, Receiver.id)
@@ -330,7 +334,7 @@ class ReceiverFile(Model):
     # receiver_tip = Reference(ReceiverFile.receiver_tip_id, ReceiverTip.id)
 
     file_path = Unicode()
-    size = Int()
+    size = Unicode()
     downloads = Int()
     last_access = DateTime()
 
@@ -356,17 +360,27 @@ class InternalFile(Model):
     """
     internaltip_id = Unicode()
     # internaltip = Reference(InternalFile.internaltip_id, InternalTip.id)
-
-    name = Unicode(validator=longtext_v)
+  
+    # removed validator (validator=longtext_v) due to encryption
+    name = Unicode()
     file_path = Unicode()
 
     content_type = Unicode()
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
     description = Unicode(validator=longtext_v)
-    size = Int()
+    # changed type from Int() to Unicode() due to encryption
+    size = Unicode()
 
-    file_encryption_nonce = Unicode()
+    
     mark = Unicode()
     _marker = [u'not processed', u'locked', u'ready', u'delivered']
+    
+    #nonces for symmetric encryption
+    file_encryption_nonce = Unicode()
+    name_nonce = Unicode()
+    content_type_nonce = Unicode()
+    size_nonce = Unicode()
     # 'not processed' = submission time
     # 'ready' = processed in ReceiverTip, available for usage
     # 'delivered' = the file need to stay on DB, but from the

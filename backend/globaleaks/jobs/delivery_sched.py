@@ -18,10 +18,12 @@ from globaleaks.jobs.base import GLJob
 from globaleaks.models import InternalFile, InternalTip, ReceiverTip, \
                               ReceiverFile, Receiver
 from globaleaks.settings import transact, transact_ro, GLSetting
-from globaleaks.utils.utility import log 
+from globaleaks.utils.utility import log , datetime_now
 from globaleaks.security import GLBGPG, GLSecureFile
 from globaleaks.handlers.admin import admin_serialize_receiver
 from globaleaks.third_party.rstr import xeger
+from globaleaks import security
+from pickle import dumps
 
 __all__ = ['DeliverySchedule']
 
@@ -221,7 +223,9 @@ def receiverfile_create(store, if_path, recv_path, status, recv_size, receiver_d
                 % (receiver_desc['name'], ifile.name, recv_size, status ) )
 
         receiverfile = ReceiverFile()
-
+        receiverfile.creation_date_nonce = security.get_b64_encoded_nonce()
+        receiverfile.creation_date = security.encrypt_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
+    
         receiverfile.downloads = 0
         receiverfile.receiver_id = receiver_desc['id']
         receiverfile.internalfile_id = ifile.id
@@ -371,6 +375,8 @@ def encrypt_where_available(receivermap):
 def create_receiver_file(store,receiver_id,InternalFile_id):
     
     receiverfile = ReceiverFile()
+    receiverfile.creation_date_nonce = security.get_b64_encoded_nonce()
+    receiverfile.creation_date = security.encrypt_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
     internalFile = store.find(InternalFile,InternalFile.id ==InternalFile_id).one()
     
     

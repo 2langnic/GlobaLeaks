@@ -239,6 +239,9 @@ def encrypt_with_ServerKey (nonce,value):
     cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(nonce)), backend=default_backend())
     return b64encode(cipher.encryptor().update(value))
 
+def get_b64_encoded_nonce():
+    return b64encode(os.urandom(GLSetting.AES_counter_nonce))
+
 def decrypt_with_ServerKey (nonce, encrypted_value):
     """
     @see: encrypt_with_Serverkey()

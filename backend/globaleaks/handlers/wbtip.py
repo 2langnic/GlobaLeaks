@@ -53,10 +53,10 @@ def wb_serialize_tip(internaltip, language=GLSetting.memory_copy.default_languag
 def wb_serialize_file(internalfile):
     wb_file_desc = {
         'id': internalfile.id,
-        'name' : internalfile.name,
-        'content_type' : internalfile.content_type,
-        'creation_date' : datetime_to_ISO8601(internalfile.creation_date),
-        'size': internalfile.size,
+        'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
+        'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+        'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
     }
     return wb_file_desc
 

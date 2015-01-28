@@ -71,10 +71,10 @@ def receiver_serialize_file(internalfile, receiverfile, receivertip_id):
             'href' : "/rtip/" + receivertip_id + "/download/" + receiverfile.id,
             # if the ReceiverFile has encrypted status, we append ".pgp" to the filename, to avoid mistake on Receiver side.
             #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
-            'name' : internalfile.name,
-            'content_type' : internalfile.content_type,
-            'creation_date' : datetime_to_ISO8601(internalfile.creation_date),
-            'size': receiverfile.size,
+            'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
+            'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+            'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
             'downloads': receiverfile.downloads
             #TODO: Encryption of the filename and perhaps downloadcounter,creation_date and size
       }
@@ -86,10 +86,10 @@ def receiver_serialize_file(internalfile, receiverfile, receivertip_id):
             'ifile_id': internalfile.id,
             'status': 'unavailable',
             'href' : "",
-            'name' : internalfile.name, # original filename
-            'content_type' : internalfile.content_type, # original content size
-            'creation_date' : datetime_to_ISO8601(internalfile.creation_date), # original creation_date
-            'size': int(internalfile.size), # original filesize
+             'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
+            'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+            'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
             'downloads': unicode(receiverfile.downloads) # this counter is always valid
         }
 

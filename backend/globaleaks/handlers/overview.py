@@ -12,10 +12,11 @@ from storm.expr import Desc
 from globaleaks.settings import transact_ro, GLSetting
 from globaleaks.handlers.base import BaseHandler
 from globaleaks.handlers.authentication import authenticated, transport_security_check
-from globaleaks import models
+from globaleaks import models, security
 
 from globaleaks.utils.utility import log, datetime_to_ISO8601
 from globaleaks.utils.structures import Rosetta
+from pickle import loads
 
 @transact_ro
 def collect_tip_overview(store, language=GLSetting.memory_copy.default_language):
@@ -151,14 +152,13 @@ def collect_files_overview(store):
 
     # ifile evaluation
     for ifile in stored_ifiles:
-
         file_desc = {
             'id': ifile.id,
-            'name': ifile.name,
-            'content_type': ifile.content_type,
-            'size': ifile.size,
+            'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
+            'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
+            'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
             'itip': ifile.internaltip_id,
-            'creation_date': datetime_to_ISO8601(ifile.creation_date),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date))),
             'rfiles': 0,
             'stored': None,
             'path': '',
@@ -194,11 +194,11 @@ def collect_files_overview(store):
 
         file_desc = {
             'id': rfile.internalfile.id,
-            'name': rfile.internalfile.name,
-            'content_type': rfile.internalfile.content_type,
-            'size': rfile.size,
+            'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
+            'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
+            'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
             'itip': rfile.internaltip_id,
-            'creation_date': datetime_to_ISO8601(ifile.creation_date),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date))),
             'rfiles': 1,
             'stored': None,
             'path': '',

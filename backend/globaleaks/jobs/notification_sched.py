@@ -10,7 +10,7 @@ import sys
 
 from twisted.internet.defer import inlineCallbacks
 
-from globaleaks import models
+from globaleaks import models, security
 from globaleaks.rest import errors
 from globaleaks.jobs.base import GLJob
 from globaleaks.plugins.base import Event
@@ -20,6 +20,7 @@ from globaleaks.utils.utility import log, datetime_to_ISO8601
 from globaleaks.plugins import notification
 from globaleaks.handlers import admin, rtip
 from globaleaks.handlers.admin.notification import admin_serialize_notification
+from pickle import loads
 
 
 def serialize_receivertip(receiver_tip):
@@ -35,10 +36,10 @@ def serialize_receivertip(receiver_tip):
 
 def serialize_internalfile(ifile):
     rfile_dict = {
-        'name': ifile.name,
-        'content_type': ifile.content_type,
-        'size': ifile.size,
-        'creation_date' : datetime_to_ISO8601(ifile.creation_date),
+        'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
+        'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
+        'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date)))
     }
     return rfile_dict
 
