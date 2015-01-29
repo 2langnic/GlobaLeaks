@@ -161,13 +161,20 @@ def delete_receiver_tip(store, user_id, tip_id):
     rtip = access_tip(store, user_id, tip_id)
 
     comment = Comment()
-    comment.content = "%s personally remove from this Tip" % rtip.receiver.name
+    comment.creation_date_nonce = security.get_b64_encoded_nonce()
+    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    
+    comment.content_nonce = security.get_b64_encoded_nonce()
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, "%s personally remove from this Tip" % rtip.receiver.name)
     comment.system_content = dict({ "type" : 2,
                                     "receiver_name" : rtip.receiver.name})
 
     comment.internaltip_id = rtip.internaltip.id
-    comment.author = u'System' # The printed line
-    comment.type = u'system' # Comment._types[2]
+    
+    comment.author_nonce = security.get_b64_encoded_nonce()
+    comment.author =security.encrypt_with_ServerKey(comment.author_nonce,"System")
+    comment.type_nonce = security.get_b64_encoded_nonce()
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[2])) # system
     comment.mark = u'not notified' # Comment._marker[0]
 
     rtip.internaltip.comments.add(comment)
@@ -220,22 +227,30 @@ def postpone_expiration_date(store, user_id, tip_id):
         datetime_to_pretty_str(rtip.internaltip.expiration_date)))
 
     comment = Comment()
+    comment.creation_date_nonce = security.get_b64_encoded_nonce()
+    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    
     comment.system_content = dict({
            'type': "1", # the first kind of structured system_comments
            'receiver_name': rtip.receiver.name,
            'expire_on' : datetime_to_ISO8601(rtip.internaltip.expiration_date)
     })
-
-    # remind: this is put just for debug, it's never used in the flow
+        # remind: this is put just for debug, it's never used in the flow
     # and a system comment may have nothing to say except the struct
-    comment.content = "%s %s %s (UTC)" % (
+    comment.content_nonce = security.get_b64_encoded_nonce()
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str("%s %s %s (UTC)" % (
                    rtip.receiver.name,
                    datetime_to_pretty_str(datetime_now()),
-                   datetime_to_pretty_str(rtip.internaltip.expiration_date))
+                   datetime_to_pretty_str(rtip.internaltip.expiration_date))))
 
     comment.internaltip_id = rtip.internaltip.id
-    comment.author = u'System' # The printed line
-    comment.type = Comment._types[2] # System
+    
+    comment.author_nonce = security.get_b64_encoded_nonce()
+    comment.author =security.encrypt_with_ServerKey(comment.author_nonce,"System")
+    
+    comment.type_nonce = security.get_b64_encoded_nonce()
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[2])) # system
+    
     comment.mark = Comment._marker[4] # skipped
 
     rtip.internaltip.comments.add(comment)
@@ -314,15 +329,13 @@ class RTipInstance(BaseHandler):
 def receiver_serialize_comment(comment):
     comment_desc = {
         'comment_id' : comment.id,
-        'type' : comment.type,
-        'content' : comment.content,
+        'type' : security.decrypt_with_ServerKey(comment.type_nonce,comment.type),
+        'content' : security.decrypt_with_ServerKey(comment.content_nonce,comment.content),
         'system_content' : comment.system_content if comment.system_content else {},
-        'author' : comment.author,
-        'creation_date' : datetime_to_ISO8601(comment.creation_date)
+        'author' : security.decrypt_with_ServerKey(comment.author_nonce,comment.author),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
     }
-
     return comment_desc
-
 
 @transact_ro
 def get_comment_list_receiver(store, user_id, tip_id):
@@ -340,16 +353,22 @@ def create_comment_receiver(store, user_id, tip_id, request):
     rtip = access_tip(store, user_id, tip_id)
 
     comment = Comment()
-    comment.content = request['content']
+    comment.creation_date_nonce = security.get_b64_encoded_nonce()
+    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    
+    comment.content_nonce = security.get_b64_encoded_nonce()
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str(request['content']))
+    
     comment.internaltip_id = rtip.internaltip.id
-    comment.author = rtip.receiver.name # The printed line
-    comment.type = Comment._types[0] # Receiver
+    comment.author_nonce = security.get_b64_encoded_nonce()
+    comment.author =security.encrypt_with_ServerKey(comment.author_nonce,str(rtip.receiver.name))
+    comment.type_nonce = security.get_b64_encoded_nonce()
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[0])) # Receiver
     comment.mark = Comment._marker[0] # Not notified
 
     rtip.internaltip.comments.add(comment)
 
     return receiver_serialize_comment(comment)
-
 
 class RTipCommentCollection(BaseHandler):
     """

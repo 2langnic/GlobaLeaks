@@ -38,11 +38,15 @@ CREATE TABLE message (
 CREATE TABLE comment (
     id VARCHAR NOT NULL,
     creation_date VARCHAR NOT NULL,
+    creation_date_nonce VARCHAR NOT NULL,
     author VARCHAR NOT NULL,
+    author_nonce VARCHAR NOT NULL,
     internaltip_id VARCHAR NOT NULL,
-    type VARCHAR NOT NULL CHECK (type IN ('receiver', 'whistleblower', 'system')),
+    type VARCHAR NOT NULL,
+    type_nonce VARCHAR NOT NULL,
     mark VARCHAR NOT NULL CHECK (mark IN ('not notified', 'notified', 'unable to notify', 'disabled', 'skipped')),
     content VARCHAR NOT NULL,
+    content_nonce VARCHAR NOT NULL,
     system_content BLOB,
     FOREIGN KEY(internaltip_id) REFERENCES internaltip(id) ON DELETE CASCADE,
     PRIMARY KEY (id)

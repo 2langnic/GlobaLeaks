@@ -398,12 +398,18 @@ class Comment(Model):
     internaltip_id = Unicode()
 
     author = Unicode()
-    content = Unicode(validator=longtext_v)
-
+    author_nonce = Unicode()
+    #removed validator due to validator=longtext_v due to encryption
+    content = Unicode()
+    content_nonce = Unicode()
     # In case of system_content usage, content has repr() equiv
     system_content = JSON()
 
     type = Unicode()
+    type_nonce = Unicode() 
+    
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
     _types = [u'receiver', u'whistleblower', u'system']
     mark = Unicode()
     _marker = [

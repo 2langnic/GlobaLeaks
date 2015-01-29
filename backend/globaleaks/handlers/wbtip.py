@@ -125,13 +125,12 @@ class WBTipInstance(BaseHandler):
 def wb_serialize_comment(comment):
     comment_desc = {
         'comment_id' : comment.id,
-        'type' : comment.type,
-        'content' : comment.content,
+        'type' : security.decrypt_with_ServerKey(comment.type_nonce,comment.type),
+        'content' : security.decrypt_with_ServerKey(comment.content_nonce,comment.content),
         'system_content' : comment.system_content if comment.system_content else {},
-        'author' : comment.author,
-        'creation_date' : datetime_to_ISO8601(comment.creation_date)
+        'author' : security.decrypt_with_ServerKey(comment.author_nonce,comment.author),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
     }
-
     return comment_desc
 
 
@@ -159,10 +158,19 @@ def create_comment_wb(store, wb_tip_id, request):
         raise errors.TipReceiptNotFound
 
     comment = Comment()
-    comment.content = request['content']
+    
+    comment.creation_date_nonce = security.get_b64_encoded_nonce()
+    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    
+    comment.content_nonce = security.get_b64_encoded_nonce()
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str(request['content']))
+    
     comment.internaltip_id = wbtip.internaltip.id
-    comment.author = u'whistleblower' # The printed line
-    comment.type = Comment._types[1] # WB
+    
+    comment.author_nonce = security.get_b64_encoded_nonce()
+    comment.author =security.encrypt_with_ServerKey(comment.author_nonce, "whistleblower") # The printed line
+    comment.type_nonce = security.get_b64_encoded_nonce()
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[1])) # WB
     comment.mark = Comment._marker[0] # Not notified
 
     wbtip.internaltip.comments.add(comment)
