@@ -25,7 +25,7 @@ from globaleaks.security import access_tip
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
-from pickle import loads
+from pickle import loads, dumps
 from globaleaks import security
 
 def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):    
@@ -445,11 +445,11 @@ def receiver_serialize_message(msg):
 
     return {
         'id' : msg.id,
-        'creation_date' : datetime_to_ISO8601(msg.creation_date),
-        'content' : msg.content,
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
+        'content' : security.decrypt_with_ServerKey(msg.content_nonce,msg.content),
         'visualized' : msg.visualized,
-        'type' : msg.type,
-        'author' : msg.author,
+        'type' : security.decrypt_with_ServerKey(msg.type_nonce,msg.type),
+        'author' : security.decrypt_with_ServerKey(msg.author_nonce,msg.author),
         'mark' : msg.mark
     }
 
@@ -465,7 +465,7 @@ def get_messages_list(store, user_id, tip_id):
     for msg in msglist:
         content_list.append(receiver_serialize_message(msg))
 
-        if not msg.visualized and msg.type == u'whistleblower':
+        if not msg.visualized and security.decrypt_with_ServerKey(msg.type_nonce, msg.type)== "whistleblower":
             log.debug("Marking as readed message [%s] from %s" % (msg.content, msg.author))
             msg.visualized = True
 
@@ -477,14 +477,23 @@ def create_message_receiver(store, user_id, tip_id, request):
     rtip = access_tip(store, user_id, tip_id)
 
     msg = Message()
-    msg.content = request['content']
-    msg.receivertip_id = rtip.id
-    msg.author = rtip.receiver.name
     msg.visualized = False
+    msg.receivertip_id = rtip.id
+    
+    msg.content_nonce = security.get_b64_encoded_nonce()
+    msg.content = security.encrypt_with_ServerKey(msg.content_nonce, str(request['content']))
+ 
+    msg.author_nonce = security.get_b64_encoded_nonce()
+    msg.author = security.encrypt_with_ServerKey(msg.author_nonce, str(rtip.receiver.name))
 
+    msg.type_nonce = security.get_b64_encoded_nonce()
     # remind: is safest use this convention, and probably we've to
     # change in the whole code the usage of Model._type[ndx]
-    msg.type = u'receiver'
+    msg.type = security.encrypt_with_ServerKey(msg.type_nonce, "receiver")
+    
+    msg.creation_date_nonce = security.get_b64_encoded_nonce()
+    msg.creation_date = security.encrypt_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
+    
     msg.mark = u'skipped'
 
     store.add(msg)

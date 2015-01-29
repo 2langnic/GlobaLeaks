@@ -21,7 +21,7 @@ from globaleaks.rest import errors
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
-from pickle import loads
+from pickle import loads, dumps
 from base64 import b64decode
 from globaleaks import security
 
@@ -322,11 +322,11 @@ class WBTipReceiversCollection(BaseHandler):
 def wb_serialize_message(msg):
     return {
         'id' : msg.id,
-        'creation_date' : datetime_to_ISO8601(msg.creation_date),
-        'content' : msg.content,
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
+        'content' : security.decrypt_with_ServerKey(msg.content_nonce,msg.content),
         'visualized' : msg.visualized,
-        'type' : msg.type,
-        'author' : msg.author,
+        'type' : security.decrypt_with_ServerKey(msg.type_nonce,msg.type),
+        'author' : security.decrypt_with_ServerKey(msg.author_nonce,msg.author),
         'mark' : msg.mark
     }
 
@@ -354,7 +354,7 @@ def get_messages_content(store, wb_tip_id, receiver_id):
     for msg in messages:
         messages_list.append(wb_serialize_message(msg))
 
-        if not msg.visualized and msg.type == u'receiver':
+        if not msg.visualized and security.decrypt_with_ServerKey(msg.type_nonce, msg.type) == "receiver":
             log.debug("Marking as readed message [%s] from %s" % (msg.content, msg.author))
             msg.visualized = True
 
@@ -381,12 +381,22 @@ def create_message_wb(store, wb_tip_id, receiver_id, request):
         raise errors.TipIdNotFound
 
     msg = Message()
-    msg.content = request['content']
-    msg.receivertip_id = rtip.id
-    msg.author = u'Whistleblower'
     msg.visualized = False
+    msg.receivertip_id = rtip.id
+    
+    msg.content_nonce = security.get_b64_encoded_nonce()
+    msg.content = security.encrypt_with_ServerKey(msg.content_nonce,str(request['content']))
+    
+    msg.author_nonce = security.get_b64_encoded_nonce()
+    msg.author = security.encrypt_with_ServerKey(msg.author_nonce, "Whistleblower")
+    
 
-    msg.type = u'whistleblower'
+    msg.type_nonce = security.get_b64_encoded_nonce()
+    msg.type = security.encrypt_with_ServerKey(msg.type_nonce, "whistleblower")
+    
+    msg.creation_date_nonce = security.get_b64_encoded_nonce()
+    msg.creation_date = security.encrypt_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
+    
     msg.mark = u'not notified'
 
     try:

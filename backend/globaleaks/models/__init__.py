@@ -423,11 +423,21 @@ class Message(Model):
     """
     receivertip_id = Unicode()
     author = Unicode()
-    content = Unicode(validator=longtext_v)
+    author_nonce = Unicode()
+    # Removed validator for encryption validator=longtext_v
+    content = Unicode()
+    content_nonce = Unicode()
+    
+    #Creation Date
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
+    
     visualized = Bool()
 
     type = Unicode()
-    _types = [u'receiver', u'whistleblower']
+    type_nonce = Unicode()
+    # out commented due to the fact that the encrypted value is not in that range 
+    #_types = [u'receiver', u'whistleblower']
     mark = Unicode()
     _marker = [
         u'not notified',

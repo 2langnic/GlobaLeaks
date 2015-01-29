@@ -22,11 +22,15 @@ CREATE TABLE message (
     id VARCHAR NOT NULL,
     visualized INTEGER NOT NULL,
     creation_date VARCHAR NOT NULL,
+    creation_date_nonce VARCHAR NOT NULL,
     author VARCHAR NOT NULL,
+    author_nonce VARCHAR NOT NULL,
     receivertip_id VARCHAR NOT NULL,
-    type VARCHAR NOT NULL CHECK (type IN ('receiver', 'whistleblower' )),
+    type VARCHAR NOT NULL,
+    type_nonce VARCHAR NOT NULL,
     mark VARCHAR NOT NULL CHECK (mark IN ('not notified', 'notified', 'unable to notify', 'disabled', 'skipped')),
     content VARCHAR NOT NULL,
+    content_nonce VARCHAR NOT NULL,
     FOREIGN KEY(receivertip_id) REFERENCES receivertip(id) ON DELETE CASCADE,
     PRIMARY KEY (id)
 );
