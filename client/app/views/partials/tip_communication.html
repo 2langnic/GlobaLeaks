@@ -73,9 +73,9 @@
       </div>
     </div>
 
-    <div class="col-md-7" ng-if="tip.enable_private_messages && tip.receivers.length > 1">
+      <div class="col-md-2" ng-if="tip.enable_private_messages && tip.receivers.length > 1"> </div>
 
-    <div class="col-md-5">
+    <div class="col-md-5" ng-if="tip.enable_private_messages">
       <div data-ng-switch="" on="role">
         <div data-ng-switch-when="receiver">
           <div>
@@ -143,5 +143,4 @@
       </div>
     </div>
   </div>
-</div>
 
