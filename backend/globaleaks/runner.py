@@ -33,7 +33,7 @@ def start_asynchronous():
     delivery = delivery_sched.DeliverySchedule()
     notification = notification_sched.NotificationSchedule()
     clean = cleaning_sched.CleaningSchedule()
-    pgp_check = pgp_check_sched.PGPCheckSchedule()
+
 
     # here we prepare the schedule:
     #  - first argument is the first run delay in seconds
@@ -43,7 +43,9 @@ def start_asynchronous():
     reactor.callLater(10, delivery.start, GLSetting.delivery_seconds_delta)  # @UndefinedVariable
     reactor.callLater(20, notification.start, GLSetting.notification_minutes_delta * 60)  # @UndefinedVariable
     reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)  # @UndefinedVariable
-    reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)  # @UndefinedVariable
+    if not GLSetting.symmetricEncryption:
+        pgp_check = pgp_check_sched.PGPCheckSchedule()
+        reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)  # @UndefinedVariable
 
 
     # anti flood protection, anomaly collection, stats

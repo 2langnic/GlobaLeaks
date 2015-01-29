@@ -175,6 +175,7 @@ class FirstSetup(BaseHandler):
         GLApiCache.set('contexts', self.request.language, public_contexts_list)
         public_receivers_list = yield get_public_receiver_list(self.request.language)
         GLApiCache.set('receivers', self.request.language, public_receivers_list)
+        #TODO JH: Add GLSetting.cleaning_dead_files() if old encryption
 
         self.set_status(201) # Created
         self.finish()

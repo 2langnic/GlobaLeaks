@@ -105,6 +105,8 @@ class GLSettingsClass:
         # command line parsing utils
         self.parser = OptionParser()
         self.cmdline_options = None
+        
+        self.symmetricEncryption= False
 
         # version
         self.version_string = __version__
