@@ -298,7 +298,7 @@ class Download(BaseHandler):
 
         filelocation = os.path.join(GLSetting.submission_path, rfile['path'])
         
-        cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(rfile['nonce'])), backend=default_backend())
+        cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(rfile['nonce'])), backend=default_backend())
         try:
             # https://docs.python.org/2/library/functions.html#open
             # r read

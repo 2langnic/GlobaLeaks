@@ -7,7 +7,10 @@ GLClient.controller('WizardCtrl', ['$scope', '$rootScope', '$location', '$route'
                                                       CONSTANTS) {
 
     $scope.email_regexp = CONSTANTS.email_regexp;
-
+    $scope.encryptionoptions = [
+        {encryptionoption: 'PGP (All files are encrypted with the receivers public keys)'},
+        {encryptionoption: 'Symmetric Encryption (All files encrypted with one key)'}
+    ];
     finished = false;
 
     $scope.open_modal_allow_unencrypted = function() {
@@ -22,7 +25,7 @@ GLClient.controller('WizardCtrl', ['$scope', '$rootScope', '$location', '$route'
         $scope.admin.node.allow_unencrypted = result;
       });
     };
-
+    
 
     $scope.finish = function() {
       if (!finished) {
@@ -54,7 +57,7 @@ GLClient.controller('WizardCtrl', ['$scope', '$rootScope', '$location', '$route'
         $rootScope.language = $scope.language;
       }
     });
-
+ var validSymKeyLength;
     Node.get(function (node) {
       $scope.node = node;
       if ($scope.node.wizard_done) {
@@ -71,6 +74,11 @@ GLClient.controller('WizardCtrl', ['$scope', '$rootScope', '$location', '$route'
           passwordWatcher($scope, 'admin.node.password');
           changePasswordWatcher($scope, "admin.node.old_password",
             "admin.node.password", "admin.node.check_password");
+            
+       $scope.admin.node.symm_key = "";
+       $scope.$watch("admin.node.symm_key", function(){
+            $scope.validSymKeyLength = $scope.admin.node.symm_key.length === 32; 
+      });
         });
       }
     });

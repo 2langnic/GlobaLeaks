@@ -26,7 +26,40 @@
         </a>
       </div>
     </div>
-    <div id="WizardStep2" data-ng-show="step == 2">
+     <div id="WizardStep1" data-ng-show="step == 2">
+      <div class="row wizard-block">
+        <h2>
+          <strong>
+            <span data-translate>Please choose the primary encryption mode of the GlobaLeaks System</span>
+          </strong>
+        </h2>
+          <select data-ng-init="encryption = encryptionoptions[0]" data-ng-model="encryption" data-ng-options="e.encryptionoption for e in encryptionoptions" class="form-control"></select>
+        </div>
+      <div ng-if="encryption === encryptionoptions[1]" >
+          <div class="form-group col-md-12" >
+            <label class="col-md-4">
+              <span data-translate>Symmetric Encryption Key</span>
+            </label>
+           <div class="col-md-8">
+              <input type="password" class="form-control" data-ng-model="admin.node.symm_key" placeholder="" required>
+              <span class="help-block">
+                <span data-translate>Please enter the symmetric encryption key</span>
+              </span>
+            </div>
+          </div>
+          <p class="has-error" data-ng-show="!validSymKeyLength">
+          <span data-translate>For a 256 Bit symmetric encryption a key with 32 ASCII characters is needed!</span>
+          </p>
+      </div>
+      
+      <div class="pager pull-right">
+        <a class="btn btn-success btn-large" data-ng-click="step=step+1">
+          <span data-translate>Next Step</span>
+        </a>
+      </div>
+    </div>  
+      
+    <div id="WizardStep2" data-ng-show="step == 3">
       <div class="row wizard-block">
         <h2 data-translate>General</h2>
 
@@ -244,18 +277,18 @@
         <a class="btn btn-success btn-large" data-ng-click="step=step-1">
           <span data-translate>Previous Step</span>
         </a>
-        <a class="btn btn-success btn-large" data-ng-click="step=step+1" data-ng-disabled="wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor)">
+        <a class="btn btn-success btn-large" data-ng-click="step=step+1" data-ng-disabled="wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor) || (encryption === encryptionoptions[1] && !validSymKeyLength)">
           <span data-translate>Next Step</span>
         </a>
       </div>
     </div>
 
 
-    <div id="WizardStep3" data-ng-show="step == 3">
+    <div id="WizardStep3" data-ng-show="step == 4">
       <div class="row">
 
         <div class="col-md-10">
-          <div class="congratulations" data-ng-show="!(wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor))">
+          <div class="congratulations">
             <h2 data-translate>Congratulations!</h2>
             <div>
               <span data-translate>You have finished configuring your GlobaLeaks site. You are now ready to future tweak it inside of the admin interface.</span>
@@ -264,7 +297,7 @@
         </div>
 
         <div class="pager pull-right">
-          <a class="btn btn-success btn-large" data-ng-click="finish()" data-ng-disabled="wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor)">
+          <a class="btn btn-success btn-large" data-ng-click="finish()">
             <span data-translate>Go to admin interface</span>
           </a>  
         </div>

@@ -98,6 +98,7 @@ def anon_serialize_node(store, language=GLSetting.memory_copy.default_language):
       'custom_homepage': custom_homepage,
       'disable_privacy_badge': node.disable_privacy_badge,
       'wb_hide_stats': node.wb_hide_stats,
+      'symm_key': u"",
       'disable_security_awareness_badge': node.disable_security_awareness_badge,
       'disable_security_awareness_questions': node.disable_security_awareness_questions,
       'enable_custom_privacy_badge': node.enable_custom_privacy_badge,

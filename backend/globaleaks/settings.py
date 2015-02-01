@@ -106,7 +106,11 @@ class GLSettingsClass:
         self.parser = OptionParser()
         self.cmdline_options = None
         
+        #Symmetric Enryption stuff
         self.symmetricEncryption= False
+        self.symmetricEncryptionTestphrase = "hasdifhuiough23487438ghf8aso7dgf8239g6t42grf0asdgf92783gf"
+        ########### Tests for new encryption
+        self.mainServerKey = "ABCdef78&%ABCdef78&%ABCdef78&%23";
 
         # version
         self.version_string = __version__
@@ -312,11 +316,7 @@ class GLSettingsClass:
         self.debug_option_UUID_human = ""
         self.debug_UUID_human_counter = 0
         self.debug_option_mlockall = False
-        
-        ########### Tests for new encryption
-        self.mainServerKey = "ABCdef78&%ABCdef78&%ABCdef78&%23";
-
-
+       
     def eval_paths(self):
         self.config_file_path = '/etc/globaleaks'
 

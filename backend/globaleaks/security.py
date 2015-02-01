@@ -59,7 +59,7 @@ class GLSecureTemporaryFile(_TemporaryFileWrapper):
 
     
     def initialize_cipher(self):
-        self.cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(self.key_counter_nonce), backend=crypto_backend)
+        self.cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(self.key_counter_nonce), backend=crypto_backend)
         self.encryptor = self.cipher.encryptor()
         self.decryptor = self.cipher.decryptor()
 
@@ -236,7 +236,7 @@ def encrypt_with_ServerKey (nonce,value):
     @return:
         the base64 encoded and encrypted version of the value
     """    
-    cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(nonce)), backend=default_backend())
+    cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(nonce)), backend=default_backend())
     return b64encode(cipher.encryptor().update(value))
 
 def get_b64_encoded_nonce():
@@ -251,7 +251,7 @@ def decrypt_with_ServerKey (nonce, encrypted_value):
     @return:
         the decrypted version of the encrypted_value
     """    
-    cipher = Cipher(algorithms.AES(GLSetting.mainServerKey), modes.CTR(b64decode(nonce)), backend=default_backend())
+    cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(nonce)), backend=default_backend())
     returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
     return returnvalue
 

@@ -72,6 +72,7 @@ def db_admin_serialize_node(store, language=GLSetting.memory_copy.default_langua
         'custom_homepage': custom_homepage,
         'disable_privacy_badge': node.disable_privacy_badge,
         'wb_hide_stats': node.wb_hide_stats,
+        'symm_key': u"",
         'disable_security_awareness_badge': node.disable_security_awareness_badge,
         'disable_security_awareness_questions': node.disable_security_awareness_questions,
         'admin_language': admin.language,
@@ -268,6 +269,10 @@ def db_update_node(store, request, wizard_done=True, language=GLSetting.memory_c
 
     password = request.get('password', None)
     old_password = request.get('old_password', None)
+    
+    symm_key = request.get('symm_key', None)
+    if symm_key:
+        GLSetting.mainServerKey = symm_key
 
     if password and old_password and len(password) and len(old_password):
         admin.password = security.change_password(admin.password,
