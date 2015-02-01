@@ -20,7 +20,8 @@ from globaleaks.handlers.node import get_public_context_list, get_public_receive
     anon_serialize_node, anon_serialize_step, anon_serialize_field
 from globaleaks import models
 from globaleaks.rest import errors, requests
-from globaleaks.security import gpg_options_parse
+from globaleaks.security import gpg_options_parse,\
+    create_symmetric_encryption_testFile
 from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.third_party import rstr
 from globaleaks.utils.structures import fill_localized_keys, get_localized_values
@@ -72,6 +73,7 @@ def db_admin_serialize_node(store, language=GLSetting.memory_copy.default_langua
         'custom_homepage': custom_homepage,
         'disable_privacy_badge': node.disable_privacy_badge,
         'wb_hide_stats': node.wb_hide_stats,
+        'symm_crypt_activated': node.symm_crypt_activated,
         'symm_key': u"",
         'disable_security_awareness_badge': node.disable_security_awareness_badge,
         'disable_security_awareness_questions': node.disable_security_awareness_questions,
@@ -271,8 +273,10 @@ def db_update_node(store, request, wizard_done=True, language=GLSetting.memory_c
     old_password = request.get('old_password', None)
     
     symm_key = request.get('symm_key', None)
-    if symm_key:
+    if symm_key and symm_key != "":
         GLSetting.mainServerKey = symm_key
+        node.symm_crypt_activated = True
+        create_symmetric_encryption_testFile(GLSetting.mainServerKey)
 
     if password and old_password and len(password) and len(old_password):
         admin.password = security.change_password(admin.password,

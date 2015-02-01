@@ -255,6 +255,25 @@ def decrypt_with_ServerKey (nonce, encrypted_value):
     returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
     return returnvalue
 
+def create_symmetric_encryption_testFile(key):
+    testFile = open(os.path.join(GLSetting.glfiles_path,'testFile.aes'),'w+b')
+    nonceFile = open(os.path.join(GLSetting.glfiles_path,'testNonce.aes'),'w+b')
+    nonce = get_b64_encoded_nonce()
+    nonceFile.write(nonce)
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    testFile.write(cipher.encryptor().update(GLSetting.symmetricEncryptionTestphrase))
+    
+def test_symmetric_encryption_testFile(key):
+    testFile = open(os.path.join(GLSetting.glfiles_path,'testFile.aes'),'r+b')
+    nonceFile = open(os.path.join(GLSetting.glfiles_path,'testNonce.aes'),'r+b')
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonceFile.read())), backend=default_backend())
+    if (GLSetting.symmetricEncryptionTestphrase == cipher.decryptor().update(testFile.read())):
+        return True
+    return False
+    
+def check_symmetric_encryption_testFileExists():
+    return os.path.isfile(os.path.join(GLSetting.glfiles_path,'testFile.aes')) 
+
 class GLBGPG:
     """
     GPG has not a dedicated class, because one of the function is called inside a transact, and

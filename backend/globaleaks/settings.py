@@ -205,6 +205,7 @@ class GLSettingsClass:
         self.defaults.tor2web_unauth = True
         self.defaults.allow_unencrypted = False
         self.defaults.wb_hide_stats = False
+        self.defaults.symm_crypt_activated = False
         self.defaults.maximum_namesize = 128
         self.defaults.maximum_textsize = 4096
         self.defaults.maximum_filesize = 30 # expressed in megabytes
