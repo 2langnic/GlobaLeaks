@@ -9,7 +9,7 @@ import os
 
 from globaleaks.rest import errors, requests
 from globaleaks.settings import transact, transact_ro, GLSetting
-from globaleaks import models
+from globaleaks import models, security
 from globaleaks.security import get_salt, hash_password
 from globaleaks.utils.utility import datetime_now, datetime_null, log
 from globaleaks.third_party import rstr
@@ -49,7 +49,13 @@ def opportunistic_appdata_init():
 
     return appdata_dict
 
-
+@transact         
+def checkSymmcrypt(store):
+    node = store.find(models.Node).one()
+    if (node.symm_crypt_activated):
+        node.symm_crypt_key_initialized = False
+        if not security.check_symmetric_encryption_testFileExists():
+            raise Exception('Error! Symmetric encryption is activated in the database but the testFile.aes was not found!')
 @transact
 def initialize_node(store, results, only_node, appdata):
     """

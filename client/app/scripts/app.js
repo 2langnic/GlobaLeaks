@@ -156,6 +156,18 @@ var GLClient = angular.module('GLClient', [
         header_title: 'Login',
         header_subtitle: ''
       }).
+      when('/symcryptenterkey', {
+        templateUrl: 'views/partials/sym_crypt_key.html',
+        controller: 'SymCryptCtrl',
+        header_title: 'Encryption Key',
+        header_subtitle: ''
+      }).
+      when('/maintenance', {
+        templateUrl: 'views/partials/maintenance.html',
+        controller: '',
+        header_title: 'Maintenance',
+        header_subtitle: ''
+      }).
       when('/start', {
         templateUrl: 'views/home.html',
         controller: 'HomeCtrl',

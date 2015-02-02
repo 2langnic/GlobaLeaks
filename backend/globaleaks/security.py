@@ -272,7 +272,7 @@ def test_symmetric_encryption_testFile(key):
     return False
     
 def check_symmetric_encryption_testFileExists():
-    return os.path.isfile(os.path.join(GLSetting.glfiles_path,'testFile.aes')) 
+    return ((os.path.isfile(os.path.join(GLSetting.glfiles_path,'testFile.aes'))) and (os.path.isfile(os.path.join(GLSetting.glfiles_path,'testNonce.aes'))))
 
 class GLBGPG:
     """

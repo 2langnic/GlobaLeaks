@@ -51,6 +51,10 @@ subKeyDict = {
     'password' : unicode,
 }
 
+symmEncryptKeyDict = {
+    'key' : unicode,
+}
+
 wbSubmissionDesc = {
     'wb_steps' : list,
     'context_id' : uuid_regexp,
@@ -128,6 +132,7 @@ adminNodeDesc = {
     'allow_unencrypted': bool,
     'wizard_done': bool,
     'symm_crypt_activated':bool,
+    'symm_crypt_key_initialized':bool,
     'disable_privacy_badge': bool,
     'wb_hide_stats': bool,
     'symm_key': unicode,
@@ -250,6 +255,7 @@ anonNodeDesc = {
     'allow_unencrypted': bool,
     'wizard_done': bool,
     'symm_crypt_activated':bool,
+    'symm_crypt_key_initialized':bool,
     'configured': bool,
     'disable_privacy_badge': bool,
     'symm_key': unicode,

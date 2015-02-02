@@ -107,6 +107,7 @@ class GLSettingsClass:
         self.cmdline_options = None
         
         #Symmetric Enryption stuff
+        #TODO JH: Check where this variable is used
         self.symmetricEncryption= False
         self.symmetricEncryptionTestphrase = "hasdifhuiough23487438ghf8aso7dgf8239g6t42grf0asdgf92783gf"
         ########### Tests for new encryption
@@ -206,6 +207,7 @@ class GLSettingsClass:
         self.defaults.allow_unencrypted = False
         self.defaults.wb_hide_stats = False
         self.defaults.symm_crypt_activated = False
+        self.defaults.symm_crypt_key_initialized = False
         self.defaults.maximum_namesize = 128
         self.defaults.maximum_textsize = 4096
         self.defaults.maximum_filesize = 30 # expressed in megabytes

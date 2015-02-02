@@ -1,0 +1,27 @@
+<div data-ng-controller="SymCryptCtrl">
+    <div>
+        <div class="form-group col-md-12" ></div>
+        <div>
+            <div class="form-group col-md-12" >
+                <label class="col-md-4">
+                    <span data-translate>Symmetric Encryption Key</span>
+                </label>
+                <div class="col-md-6">
+                    <input type="password" class="form-control" data-ng-model="encryptionKey" placeholder="" required>
+                    <span class="help-block">
+                        <span data-translate>Please enter the symmetric encryption key</span>
+                    </span>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success" data-ng-disabled="!validSymKeyLength" data-ng-click="checkEncryptionKey(encryptionKey)">Set the encryption key</button>
+                </div>
+            </div>
+            <p class="has-error" data-ng-show="!validSymKeyLength">
+                <span data-translate>For a 256 Bit symmetric encryption a key with 32 ASCII characters is needed!</span>
+            </p>
+            <p class="has-error" data-ng-show="wrongkey">
+                <span data-translate>The entered encryption key is not the same as on the server. Please try again.</span>
+            </p>
+        </div>
+    </div>
+</div>

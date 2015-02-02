@@ -96,6 +96,7 @@ def create_tables(create_node=True):
             'disable_privacy_badge': False,
             'wb_hide_stats': False,
             'symm_crypt_activated': False,
+            'symm_crypt_key_initialized':False,
             'disable_security_awareness_badge': False,
             'disable_security_awareness_questions': False,
             'enable_custom_privacy_badge': False,

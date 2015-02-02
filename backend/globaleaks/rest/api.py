@@ -87,6 +87,7 @@ spec = [
 
     ## Admin Handlers ##
     (r'/admin/node', admin.NodeInstance),
+    (r'/admin/symmkey',admin.SymmKey),
     (r'/admin/context', admin.ContextsCollection),
     (r'/admin/context/' + uuid_regexp, admin.ContextInstance),
     (r'/admin/receiver', admin.ReceiversCollection),
