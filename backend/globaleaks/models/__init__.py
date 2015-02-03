@@ -507,7 +507,6 @@ class Node(Model):
     disable_privacy_badge = Bool(default=False)
     wb_hide_stats = Bool(default=False)
     symm_crypt_activated = Bool(default=False)
-    symm_crypt_key_initialized = Bool(default=False)
     disable_security_awareness_badge = Bool(default=False)
     disable_security_awareness_questions = Bool(default=False)
 

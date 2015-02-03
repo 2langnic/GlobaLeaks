@@ -53,7 +53,6 @@ def opportunistic_appdata_init():
 def checkSymmcrypt(store):
     node = store.find(models.Node).one()
     if (node.symm_crypt_activated):
-        node.symm_crypt_key_initialized = False
         if not security.check_symmetric_encryption_testFileExists():
             raise Exception('Error! Symmetric encryption is activated in the database but the testFile.aes was not found!')
 @transact

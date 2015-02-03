@@ -168,7 +168,6 @@ CREATE TABLE node (
     disable_privacy_badge INTEGER NOT NULL,
     wb_hide_stats INTEGER NOT NULL,
     symm_crypt_activated INTEGER NOT NULL,
-    symm_crypt_key_initialized INTEGER NOT NULL,
     disable_security_awareness_badge INTEGER NOT NULL,
     disable_security_awareness_questions INTEGER NOT NULL,
     enable_custom_privacy_badge INTEGER NOT NULL DEFAULT 0,

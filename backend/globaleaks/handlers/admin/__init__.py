@@ -74,7 +74,7 @@ def db_admin_serialize_node(store, language=GLSetting.memory_copy.default_langua
         'disable_privacy_badge': node.disable_privacy_badge,
         'wb_hide_stats': node.wb_hide_stats,
         'symm_crypt_activated': node.symm_crypt_activated,
-        'symm_crypt_key_initialized': node.symm_crypt_key_initialized,
+        'symm_crypt_key_initialized': GLSetting.symm_crypt_key_initialized,
         'symm_key': u"",
         'disable_security_awareness_badge': node.disable_security_awareness_badge,
         'disable_security_awareness_questions': node.disable_security_awareness_questions,
@@ -277,7 +277,7 @@ def db_update_node(store, request, wizard_done=True, language=GLSetting.memory_c
     if symm_key and symm_key != "":
         GLSetting.mainServerKey = symm_key
         node.symm_crypt_activated = True
-        node.symm_crypt_key_initialized = True
+        GLSetting.symm_crypt_key_initialized = True
         create_symmetric_encryption_testFile(GLSetting.mainServerKey)
 
     if password and old_password and len(password) and len(old_password):
@@ -865,7 +865,6 @@ class NodeInstance(BaseHandler):
         """
         node_description = yield admin_serialize_node(self.request.language)
         self.set_status(200)
-        print "node_description  symm_crypt_key_initialized: " + str(node_description['symm_crypt_key_initialized'])
         self.finish(node_description)
 
     @transport_security_check('admin')
@@ -896,45 +895,47 @@ class NodeInstance(BaseHandler):
 
         self.set_status(202) # Updated
         self.finish(node_description)
-        
-@transact
-def set_symm_crypt_key_initialized(store):
-    node = store.find(models.Node).one()
-    node.symm_crypt_key_initialized = True
 
 class SymmKey(BaseHandler):
     """
-    This is the authentication Handler for the submissions.
-    This is needed due to the new encryption scheme which needs another security level for the data.
-    Every Submission in combination with every receiver of the submission has their own key which is used to encrypt the data.
+    This handler is used when the symmetric encryption is activated.
     """
             
     def get(self):
         #empty not needed right now
         return True
     
+    @inlineCallbacks
     def put(self):
         """
-        The put is used when a new password is created. This password is not stored in the database. 
-        This method just saves the state that a password was set and in later release encrypt the data with this password.
+        The put function is used when a restart of a system occurs (without the wizard). 
+        It takes the key and checks it against the encrypted file.
         """
-        request = self.validate_message(self.request.body, requests.symmEncryptKeyDict)
-
-        key = request['key']
-        key_set_successful =  security.test_symmetric_encryption_testFile(key)      
-        
-        if key_set_successful:
-            set_symm_crypt_key_initialized();
-            # cache must be updated in particular to set symm_crypt_key_initialized = True
-            public_node_desc = yield anon_serialize_node(self.request.language)
-            GLApiCache.invalidate('node')
-            GLApiCache.set('node', self.request.language, public_node_desc)
-        
-        answer  = {
-        'key_set_successful' : key_set_successful
-        }
-        self.set_status(201) # Created
-        self.finish(answer)
+        if GLSetting.symm_crypt_key_initialized:
+            # the key has already been set.. Now just a false is returned
+            answer  = {
+                       'key_set_successful' : False
+                       }
+            self.set_status(201) # Created
+            self.finish(answer)
+        else:    
+            request = self.validate_message(self.request.body, requests.symmEncryptKeyDict)
+    
+            key = request['key']
+            key_set_successful =  security.test_symmetric_encryption_testFile(key)      
+            
+            if key_set_successful:
+                GLSetting.symm_crypt_key_initialized = True
+                # cache must be updated in particular to set symm_crypt_key_initialized = True
+                public_node_desc = yield anon_serialize_node(self.request.language)
+                GLApiCache.invalidate('node')
+                GLApiCache.set('node', self.request.language, public_node_desc)
+            
+            answer  = {
+            'key_set_successful' : key_set_successful
+            }
+            self.set_status(201) # Created
+            self.finish(answer)
         
 class ContextsCollection(BaseHandler):
     """
