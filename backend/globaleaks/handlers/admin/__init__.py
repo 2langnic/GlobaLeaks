@@ -28,6 +28,7 @@ from globaleaks.third_party import rstr
 from globaleaks.utils.structures import fill_localized_keys, get_localized_values
 from globaleaks.utils.utility import log, datetime_now, datetime_null, seconds_convert, datetime_to_ISO8601
 from globaleaks.utils import utility
+from globaleaks.runner import start_asynchronous
 
 
 def db_admin_serialize_node(store, language=GLSetting.memory_copy.default_language):
@@ -281,6 +282,7 @@ def db_update_node(store, request, wizard_done=True, language=GLSetting.memory_c
         node.symm_crypt_activated = True
         GLSetting.symm_crypt_key_initialized = True
         create_symmetric_encryption_testFile(GLSetting.mainServerKey)
+        start_asynchronous()
 
     if password and old_password and len(password) and len(old_password):
         admin.password = security.change_password(admin.password,
@@ -910,7 +912,7 @@ class SymmKey(BaseHandler):
     @inlineCallbacks
     def put(self):
         """
-        The put function is used when a restart of a system occurs (without the wizard). 
+        The put function is used when a restart of a system occurs (without the wizard) and the symmetric encryption is activated. 
         It takes the key and checks it against the encrypted file.
         """
         if GLSetting.symm_crypt_key_initialized:
@@ -926,12 +928,17 @@ class SymmKey(BaseHandler):
                 yield utility.deferred_sleep(delay)
              
             request = self.validate_message(self.request.body, requests.symmEncryptKeyDict)
-    
             key = request['key']
-            key_set_successful =  security.test_symmetric_encryption_testFile(key)      
+            try:
+                key_set_successful =  security.test_symmetric_encryption_testFile(key)
+            except Exception as e:
+                log.debug("Error in test_symmetric_encryption_testFile:" + str(e))
+                key_set_successful = False  
             
             if key_set_successful:
                 GLSetting.symm_crypt_key_initialized = True
+                GLSetting.mainServerKey = key
+                start_asynchronous()
                 # cache must be updated in particular to set symm_crypt_key_initialized = True
                 public_node_desc = yield anon_serialize_node(self.request.language)
                 GLApiCache.invalidate('node')

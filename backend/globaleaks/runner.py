@@ -13,7 +13,13 @@ from globaleaks.utils.utility import log, datetime_now
 from globaleaks.db import create_tables, check_schema_version, clean_untracked_files
 from globaleaks.db.datainit import import_memory_variables, apply_cli_options,\
     checkSymmcrypt
-from globaleaks.settings import GLSetting
+from globaleaks.settings import GLSetting, transact
+from globaleaks import models
+
+@transact
+def checkSymmCryptActivated(store):
+    node = store.find(models.Node).one()
+    return node.symm_crypt_activated
 
 def start_asynchronous():
     """
@@ -44,8 +50,8 @@ def start_asynchronous():
     reactor.callLater(10, delivery.start, GLSetting.delivery_seconds_delta)  # @UndefinedVariable
     reactor.callLater(20, notification.start, GLSetting.notification_minutes_delta * 60)  # @UndefinedVariable
     reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)  # @UndefinedVariable
-    if not GLSetting.symmetricEncryption:
-        #TODO JH: change to node.symmcrypt_activated
+    if not checkSymmCryptActivated():
+        #This task will never be started when the symmetric encryption is enabled
         pgp_check = pgp_check_sched.PGPCheckSchedule()
         reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)  # @UndefinedVariable
 
@@ -96,7 +102,9 @@ def globaleaks_start():
     @d.addCallback
     @inlineCallbacks
     def cb(res):
-        start_asynchronous()
+        if not checkSymmCryptActivated():
+            print "Starting asynchronous"
+            start_asynchronous()
         checkSymmcrypt()
         yield import_memory_variables()
         tor_configured_hosts = yield apply_cli_options()
