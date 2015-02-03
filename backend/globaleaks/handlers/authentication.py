@@ -40,7 +40,7 @@ class GLSession(tempobj.TempObj):
                          (self.user_role, self.user_id, self._expireCall)
         return session_string
 
-def random_login_delay():
+def random_login_delay(type):
     """
     in case of failed_login_attempts introduces
     an exponential increasing delay between 0 and 42 seconds
@@ -56,7 +56,13 @@ def random_login_delay():
            | x > 42          | 42             |
             ----------------------------------
         """
-    failed_attempts = GLSetting.failed_login_attempts
+    if (type == "auth"):
+        failed_attempts = GLSetting.failed_login_attempts
+    else :
+        if (type == "symmkey"):
+            failed_attempts = GLSetting.failed_key_attempts
+        else:
+            Exception("unknown type")
 
     if failed_attempts >= 5:
         min_sleep = failed_attempts if failed_attempts < 42 else 42
@@ -310,7 +316,7 @@ class AuthenticationHandler(BaseHandler):
         password = request['password']
         role = request['role']
 
-        delay = random_login_delay()
+        delay = random_login_delay("auth")
         if delay:
             yield utility.deferred_sleep(delay)
 

@@ -13,7 +13,8 @@ from twisted.internet.defer import inlineCallbacks
 
 from globaleaks import security, LANGUAGES_SUPPORTED_CODES, LANGUAGES_SUPPORTED
 from globaleaks.db.datainit import import_memory_variables
-from globaleaks.handlers.authentication import authenticated, transport_security_check
+from globaleaks.handlers.authentication import authenticated, transport_security_check,\
+    random_login_delay
 from globaleaks.handlers.base import BaseHandler, GLApiCache
 from globaleaks.handlers.admin.field import disassociate_field, get_field_association
 from globaleaks.handlers.node import get_public_context_list, get_public_receiver_list, \
@@ -26,6 +27,7 @@ from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.third_party import rstr
 from globaleaks.utils.structures import fill_localized_keys, get_localized_values
 from globaleaks.utils.utility import log, datetime_now, datetime_null, seconds_convert, datetime_to_ISO8601
+from globaleaks.utils import utility
 
 
 def db_admin_serialize_node(store, language=GLSetting.memory_copy.default_language):
@@ -918,7 +920,11 @@ class SymmKey(BaseHandler):
                        }
             self.set_status(201) # Created
             self.finish(answer)
-        else:    
+        else:
+            delay = random_login_delay("symmkey")
+            if delay:
+                yield utility.deferred_sleep(delay)
+             
             request = self.validate_message(self.request.body, requests.symmEncryptKeyDict)
     
             key = request['key']
@@ -930,7 +936,8 @@ class SymmKey(BaseHandler):
                 public_node_desc = yield anon_serialize_node(self.request.language)
                 GLApiCache.invalidate('node')
                 GLApiCache.set('node', self.request.language, public_node_desc)
-            
+            else:
+                GLSetting.failed_key_attempts = GLSetting.failed_key_attempts + 1
             answer  = {
             'key_set_successful' : key_set_successful
             }
