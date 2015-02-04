@@ -55,6 +55,14 @@ GLClient.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$route', '$ro
         $scope.isHomepage = function () {
             return $location.path() == '/';
         };
+        
+        $scope.isMaintenance = function () {
+            return $location.path() == '/maintenance';
+        };
+        
+        $scope.isEnterSymmCrypt = function () {
+            return $location.path() == '/symcryptenterkey';
+        };
 
         $scope.isLoginPage = function () {
             return $location.path() == '/login';
@@ -62,7 +70,9 @@ GLClient.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$route', '$ro
 
         $scope.showLoginForm = function () {
             return (!$scope.isHomepage() &&
-                    !$scope.isLoginPage());
+                    !$scope.isLoginPage() &&
+                    !$scope.isMaintenance() &&
+                    !$scope.isEnterSymmCrypt());
         }
 
         $scope.hasSubtitle = function () {
