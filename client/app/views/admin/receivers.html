@@ -292,7 +292,7 @@
 
                       </div>
 
-                      <div class="form-group" data-ng-hide="receiver.gpg_key_fingerprint">
+                      <div class="form-group" data-ng-hide="receiver.gpg_key_fingerprint || node.symm_crypt_activated">
                         <div class="alert alert-danger">
                           <span data-translate>Encryption is not enabled!</span>
                           <span data-translate>Notifications and Files won't be encrypted.</span>

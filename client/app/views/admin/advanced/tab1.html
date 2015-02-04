@@ -27,7 +27,7 @@
       <input class="form-control" data-ng-model="admin.node.maximum_textsize" type="text" />
     </div>
 
-    <div class="form-group">
+    <div class="form-group" data-ng-hide="admin.node.symm_crypt_activated">
       <label>
         <input data-ng-model="admin.node.allow_unencrypted" ng-click="open_modal_allow_unencrypted()" type="checkbox" />
         <span data-translate>Enable insecure configuration without PGP encryption.</span>

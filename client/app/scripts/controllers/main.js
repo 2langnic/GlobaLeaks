@@ -12,7 +12,6 @@ GLClient.controller('MainCtrl', ['$scope', '$rootScope', '$http', '$route', '$ro
                     $location.path('/wizard');
                 } else
                 {
-                    console.log("state symm_crypt_key_initialized: " + $scope.node.symm_crypt_key_initialized);
                     if ($scope.node.symm_crypt_activated && !$scope.node.symm_crypt_key_initialized && $route.current.$$route.controller !== "SymCryptCtrl")
                     {
                         $location.path('/maintenance');

@@ -1,4 +1,4 @@
-<div class="col-md-8">
+<div class="col-md-8" data-ng-hide="node.symm_crypt_activated">
   <div data-ng-show="preferences.gpg_key_info">
     <div class="alert alert-success">
       <span data-translate>Encryption is enabled!</span>
@@ -53,5 +53,6 @@
     </button>
   </div>
 </div>
-
+<div class="col-md-8" data-ng-hide="!node.symm_crypt_activated">
+     <b><span data-translate>This option is not available when using symmetric encryption.</span></b>
 </div>

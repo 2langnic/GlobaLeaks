@@ -35,8 +35,8 @@ GLClient.controller('ReceiverFirstLoginCtrl', ['$scope', '$rootScope', '$locatio
 
 }]);
 
-GLClient.controller('ReceiverPreferencesCtrl', ['$scope', '$rootScope', 'ReceiverPreferences', 'changePasswordWatcher', 'CONSTANTS',
-  function($scope, $rootScope, ReceiverPreferences, changePasswordWatcher, CONSTANTS) {
+GLClient.controller('ReceiverPreferencesCtrl', ['$scope', '$rootScope','Node','ReceiverPreferences', 'changePasswordWatcher', 'CONSTANTS',
+  function($scope, $rootScope,Node, ReceiverPreferences, changePasswordWatcher, CONSTANTS) {
 
     $scope.tabs = [
       {
