@@ -21,21 +21,16 @@ from globaleaks.utils.utility import log, utc_future_date, datetime_now, datetim
 from globaleaks.third_party import rstr
 from globaleaks.rest import errors
 
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
-from encodings.base64_codec import base64_encode
-from pickle import dumps
-import base64
-from base64 import b64encode, b64decode
-import os
+from pickle import dumps, loads
+
 
 def wb_serialize_internaltip(internaltip):
 
     response = {
         'id' : internaltip.id,
         'context_id': internaltip.context_id,
-        'creation_date' : datetime_to_ISO8601(internaltip.creation_date),
-        'expiration_date' : datetime_to_ISO8601(internaltip.expiration_date),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
+        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
         'wb_steps' : internaltip.wb_steps,
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
@@ -60,6 +55,13 @@ def create_whistleblower_tip(store, submission_desc):
 
     return_value_receipt = unicode( rstr.xeger(node.receipt_regexp) )
     wbtip.receipt_hash = security.hash_password(return_value_receipt, node.receipt_salt)
+
+
+    wbtip.creation_date_nonce = security.get_b64_encoded_nonce()
+    wbtip.creation_date = security.encrypt_with_ServerKey(wbtip.creation_date_nonce,dumps(datetime_now()))
+    
+    wbtip.last_access_nonce = security.get_b64_encoded_nonce()
+    wbtip.last_access = security.encrypt_with_ServerKey(wbtip.last_access_nonce,dumps(datetime_now()))
 
     wbtip.access_counter = 0
     wbtip.internaltip_id = submission_desc['id']
@@ -214,9 +216,12 @@ def create_submission(store, request, finalize, language=GLSetting.memory_copy.d
 
     submission.access_limit = context.tip_max_access
     submission.download_limit = context.file_max_download
-    submission.expiration_date = utc_future_date(seconds=context.tip_timetolive)
+    submission.creation_date_nonce = security.get_b64_encoded_nonce()
+    submission.creation_date = security.encrypt_with_ServerKey(submission.creation_date_nonce,dumps(datetime_now()))
+    submission.expiration_date_nonce = security.get_b64_encoded_nonce()
+    submission.expiration_date = security.encrypt_with_ServerKey(submission.expiration_date_nonce,dumps(utc_future_date(seconds=context.tip_timetolive)))
     submission.context_id = context.id
-    submission.creation_date = datetime_now()
+
 
     if finalize:
         submission.mark = u'finalize'  # Finalized
@@ -293,9 +298,15 @@ def update_submission(store, submission_id, request, finalize, language=GLSettin
 
         # Encryption
         # First creation of nonce and saving it encoded in base64
-        submission.wb_steps_nonce = b64encode(os.urandom(GLSetting.AES_counter_nonce))
+        submission.wb_steps_nonce = security.get_b64_encoded_nonce()
         # Then using function from security to encrypt
         wb_steps = security.encrypt_with_ServerKey(submission.wb_steps_nonce, dumps(wb_steps))
+      
+        submission.expiration_date_nonce = security.get_b64_encoded_nonce()
+        submission.expiration_date = security.encrypt_with_ServerKey(submission.expiration_date_nonce,dumps(utc_future_date(seconds=context.tip_timetolive)))
+
+        submission.creation_date_nonce = security.get_b64_encoded_nonce()
+        submission.creation_date = security.encrypt_with_ServerKey(submission.creation_date_nonce,dumps(datetime_now()))
       
         submission.wb_steps = wb_steps
     except Exception as excep:

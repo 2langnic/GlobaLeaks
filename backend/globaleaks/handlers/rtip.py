@@ -31,8 +31,8 @@ from globaleaks import security
 def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):    
     ret_dict = {
         'context_id': internaltip.context.id,
-        'creation_date' : datetime_to_ISO8601(internaltip.creation_date),
-        'expiration_date' : datetime_to_ISO8601(internaltip.expiration_date),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
+        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
@@ -139,7 +139,8 @@ def increment_receiver_access_count(store, user_id, tip_id):
     rtip = access_tip(store, user_id, tip_id)
 
     rtip.access_counter += 1
-    rtip.last_access = datetime_now()
+    rtip.last_access_nonce = security.get_b64_encoded_nonce()
+    rtip.last_access = security.encrypt_with_ServerKey(rtip.last_access_nonce,dumps(datetime_now()))
 
     if rtip.access_counter > rtip.internaltip.access_limit:
         raise errors.AccessLimitExceeded

@@ -263,8 +263,11 @@ class InternalTip(Model):
 
     wb_steps = JSON()
     wb_steps_nonce = Unicode()
-    expiration_date = DateTime()
-    last_activity = DateTime()
+    
+    expiration_date = Unicode()
+    expiration_date_nonce = Unicode()
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
 
     # the LIMITS are stored in InternalTip because and admin may
     # need change them. These values are copied by Context
@@ -288,9 +291,13 @@ class ReceiverTip(Model):
     # internaltip = Reference(ReceiverTip.internaltip_id, InternalTip.id)
     # receiver = Reference(ReceiverTip.receiver_id, Receiver.id)
 
-    last_access = DateTime(default_factory=datetime_now)
+    last_access = Unicode()
+    last_access_nonce = Unicode()
+    
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
+    
     access_counter = Int()
-    notification_date = DateTime()
     mark = Unicode()
 
     _marker = [u'not notified', u'notified', u'unable to notify', u'disabled',
@@ -310,8 +317,11 @@ class WhistleblowerTip(Model):
     internaltip_id = Unicode()
     # internaltip = Reference(WhistleblowerTip.internaltip_id, InternalTip.id)
     receipt_hash = Unicode()
-    last_access = DateTime()
+    last_access = Unicode()
+    last_access_nonce = Unicode()
     access_counter = Int()
+    creation_date = Unicode()
+    creation_date_nonce = Unicode()
 
 
 class ReceiverFile(Model):

@@ -16,8 +16,9 @@ from globaleaks.models import Receiver, WhistleblowerTip
 from globaleaks.handlers.base import BaseHandler
 from globaleaks.rest import errors, requests
 from globaleaks.utils import utility, tempobj
-from globaleaks.utils.utility import log
+from globaleaks.utils.utility import log, datetime_now
 from globaleaks.third_party import rstr
+from pickle import dumps
 
 # needed in order to allow UT override
 reactor = None
@@ -217,7 +218,7 @@ def login_wb(store, receipt):
         return False
 
     log.debug("Whistleblower: Valid receipt")
-    wb_tip.last_access = utility.datetime_now()
+    wb_tip.last_access = security.encrypt_with_ServerKey(wb_tip.last_access_nonce,dumps(datetime_now()))
     store.commit() # the transact was read only! on success we apply the commit()
     return unicode(wb_tip.id)
 

@@ -15,6 +15,8 @@ from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.utils.utility import log, is_expired, datetime_to_ISO8601, ISO8601_to_datetime
 from globaleaks.jobs.base import GLJob
 from globaleaks.models import InternalTip, ReceiverFile, InternalFile, Comment
+from pickle import loads
+from globaleaks import security
 
 __all__ = ['CleaningSchedule']
 
@@ -41,8 +43,8 @@ def get_tiptime_by_marker(store, marker):
 
         serialized_tipinfo = {
             'id': itip.id,
-            'creation_date': datetime_to_ISO8601(itip.creation_date),
-            'expiration_date': datetime_to_ISO8601(itip.expiration_date),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(itip.creation_date_nonce,itip.creation_date))),
+            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(itip.expiration_date_nonce,itip.expiration_date))),
             'tip_life_seconds':  tip_timetolive,
             'submission_life_seconds':  submission_timetolive,
             'files': files_cnt,

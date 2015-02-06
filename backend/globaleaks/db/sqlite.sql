@@ -117,13 +117,14 @@ CREATE TABLE receiverfile (
 
 CREATE TABLE internaltip (
     id VARCHAR NOT NULL,
-    creation_date VARCHAR NOT NULL,
+    creation_date VARCHAR,
     access_limit INTEGER NOT NULL,
     download_limit INTEGER NOT NULL,
-    expiration_date VARCHAR NOT NULL,
+    expiration_date VARCHAR,
     wb_steps BLOB,
     wb_steps_nonce VARCHAR,
-    last_activity VARCHAR,
+    creation_date_nonce VARCHAR,
+    expiration_date_nonce VARCHAR,
     mark VARCHAR NOT NULL CHECK (mark IN ('submission', 'finalize', 'first', 'second')),
     context_id VARCHAR NOT NULL,
     FOREIGN KEY(context_id) REFERENCES context(id) ON DELETE CASCADE,
@@ -270,11 +271,12 @@ CREATE TABLE step_field (
 
 CREATE TABLE receivertip (
     id VARCHAR NOT NULL,
-    creation_date VARCHAR NOT NULL,
+    creation_date VARCHAR,
+    creation_date_nonce VARCHAR,
     access_counter INTEGER NOT NULL,
     internaltip_id VARCHAR NOT NULL,
     last_access VARCHAR,
-    notification_date VARCHAR,
+    last_access_nonce VARCHAR,
     password_set INTEGER NOT NULL,
     mark VARCHAR NOT NULL CHECK (mark IN ('not notified', 'notified', 'unable to notify', 'disabled', 'skipped')),
     receiver_id VARCHAR NOT NULL,
@@ -286,9 +288,11 @@ CREATE TABLE receivertip (
 CREATE TABLE whistleblowertip (
     id VARCHAR NOT NULL,
     creation_date VARCHAR NOT NULL,
+    creation_date_nonce VARCHAR,
     access_counter INTEGER NOT NULL,
     internaltip_id VARCHAR NOT NULL,
     last_access VARCHAR,
+    last_access_nonce VARCHAR,
     receipt_hash VARCHAR NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY(internaltip_id) REFERENCES internaltip(id) ON DELETE CASCADE

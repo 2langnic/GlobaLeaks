@@ -17,6 +17,8 @@ from globaleaks.security import change_password, gpg_options_parse
 from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.utils.structures import Rosetta, get_localized_values
 from globaleaks.utils.utility import log, acquire_bool, datetime_to_ISO8601, datetime_now
+from pickle import loads
+from globaleaks import security
 
 # https://www.youtube.com/watch?v=BMxaLEGCVdg
 def receiver_serialize_receiver(receiver, language=GLSetting.memory_copy.default_language):
@@ -150,7 +152,7 @@ class ReceiverInstance(BaseHandler):
 def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.default_language):
 
     rtiplist = store.find(ReceiverTip, ReceiverTip.receiver_id == receiver_id)
-    rtiplist.order_by(Desc(ReceiverTip.creation_date))
+    rtiplist.order_by(Desc(ReceiverTip.id))
 
     node = store.find(Node).one()
 
@@ -186,9 +188,9 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
 
         single_tip_sum = dict({
             'id' : rtip.id,
-            'creation_date' : datetime_to_ISO8601(rtip.creation_date),
-            'last_access' : datetime_to_ISO8601(rtip.last_access),
-            'expiration_date' : datetime_to_ISO8601(rtip.internaltip.expiration_date),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.creation_date_nonce,rtip.creation_date))),
+            'last_access' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.last_access_nonce,rtip.last_access))),
+            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date))),
             'access_counter': rtip.access_counter,
             'files_number': rfiles_n,
             'comments_number': rtip.internaltip.comments.count(),

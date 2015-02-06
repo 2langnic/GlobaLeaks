@@ -261,6 +261,13 @@ def create_receivertip(store, receiver, internaltip):
     log.debug('Creating ReceiverTip for: %s' % receiver.name)
 
     receivertip = ReceiverTip()
+    receivertip.creation_date_nonce = security.get_b64_encoded_nonce()
+    receivertip.creation_date = security.encrypt_with_ServerKey(receivertip.creation_date_nonce,dumps(datetime_now()))
+    
+    receivertip.last_access_nonce = security.get_b64_encoded_nonce()
+    receivertip.last_access = security.encrypt_with_ServerKey(receivertip.last_access_nonce,dumps(datetime_now()))
+    
+    
     receivertip.internaltip_id = internaltip.id
     receivertip.access_counter = 0
     receivertip.receiver_id = receiver.id

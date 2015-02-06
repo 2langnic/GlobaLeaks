@@ -29,9 +29,8 @@ from globaleaks import security
 def wb_serialize_tip(internaltip, language=GLSetting.memory_copy.default_language):
     ret_dict = {
         'context_id': internaltip.context.id,
-        'creation_date' : datetime_to_ISO8601(internaltip.creation_date),
-        'last_activity' : datetime_to_ISO8601(internaltip.creation_date),
-        'expiration_date' : datetime_to_ISO8601(internaltip.expiration_date),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
+        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
@@ -242,7 +241,7 @@ def get_receiver_list_wb(store, wb_tip_id, language=GLSetting.memory_copy.defaul
 
         log.debug("Early access from the WB to the Tip (creation_date: %s UTC),"\
                   " Receiver not yet present: fallback on receiver list" %
-                  datetime_to_pretty_str(wb_tip.creation_date))
+                  datetime_to_pretty_str(loads(security.decrypt_with_ServerKey(wb_tip.creation_date_nonce,wb_tip.creation_date))))
 
         for receiver in wb_tip.internaltip.receivers:
 
