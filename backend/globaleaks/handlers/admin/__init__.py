@@ -930,6 +930,18 @@ def rekeyAll(store,newKey):
             unencrypted_expiration_date = security.decrypt_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
             internaltip.expiration_date = security.symm_encrypt_String(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
         
+        # This is needed for the admin statistics
+        internalTipsList = store.find(InternalTip, InternalTip.mark == u'submission')
+        for internaltip in internalTipsList:
+            # Creation Date
+            unencrypted_creation_date = security.decrypt_with_ServerKey(internaltip.creation_date_nonce, internaltip.creation_date)
+            internaltip.creation_date = security.symm_encrypt_String(internaltip.creation_date_nonce, unencrypted_creation_date,newKey)
+            
+            # Expiration Date
+            unencrypted_expiration_date = security.decrypt_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
+            internaltip.expiration_date = security.symm_encrypt_String(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
+        
+        
         internalFilesList = store.find(InternalFile)
         for internalFile in internalFilesList:
             
