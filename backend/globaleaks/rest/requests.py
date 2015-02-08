@@ -55,6 +55,12 @@ symmEncryptKeyDict = {
     'key' : unicode,
 }
 
+symmEncryptKeyChangeDict = {
+    'key' : unicode,
+    'newKey':unicode,
+    'check':bool,
+}
+
 wbSubmissionDesc = {
     'wb_steps' : list,
     'context_id' : uuid_regexp,

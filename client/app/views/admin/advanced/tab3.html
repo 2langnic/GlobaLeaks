@@ -1,0 +1,55 @@
+<div class="row" data-ng-controller="SymCryptCtrl">
+    <div class="col-md-6">
+        <div data-ng-hide="!node.symm_crypt_activated">
+            <p>
+                <b><span data-translate>Due to the symmetric encryption a rekeying should be done regularly.</span></b>
+            </p>
+            <p><span data-translate>Please be aware that changing the serverkey could cause a total data loss. Please create a backup before using this functionality.</span> </p>
+            <p><span data-translate>Please also be aware that changing the serverkey could take a long time when there are huge files and many Submissions / Messages etc. saved.</span> </p>
+            <p><span data-translate>Please check that enough disk space is available before starting the rekeying (it temporary doubles the amount of disk space used)</span> </p>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label data-translate></label>
+                    <input class="form-control" data-ng-model="encryptionKey" name="old encryption key" type="password"/>
+                    <p class="has-error" data-ng-show="!validSymKeyLength">
+                        <span data-translate>The length of the entered key is wrong. For a 256 Bit symmetric encryption a key with 32 ASCII characters is needed!</span>
+                    </p>
+                </div>
+                <button type="button" class="btn btn-success" data-ng-disabled="!validSymKeyLength" data-ng-click="checkforChangeEncryptionKey(encryptionKey)">Check the old encryption key</button>
+                <p>
+                <span data-ng-hide="!correct_key"> Check successful </span>
+                </p>
+            </div>
+            <div class="col-md-12" data-ng-hide="!validSymKeyLength || !correct_key" >
+                <div class="form-group">
+                    <label data-translate></label>
+                    <input class="form-control" data-ng-model="new_encryptionKey" name="new encryption key" type="password"/>
+                    <p class="has-error" data-ng-show="!validNewSymKeyLength">
+                        <span data-translate>The length of the entered key is wrong. For a 256 Bit symmetric encryption a key with 32 ASCII characters is needed!</span>
+                    </p>
+                </div>
+                <button type="button" class="btn btn-success" data-ng-disabled="!validNewSymKeyLength || !correct_key || !validSymKeyLength" data-ng-click="changeEncryptionKey(encryptionKey, new_encryptionKey)">Change the encryption key</button>
+            </div>
+
+            <div class="col-md-12" data-ng-show="changeClicked">
+                <p>
+                    <b><span data-translate>Please wait....</span></b>
+                </p>
+            </div>
+
+            <div class="col-md-12" data-ng-show="changeResult && changeEncryptionclicked">
+                <p>
+                    <b><span data-translate>Change of the symmetric key was successful!</span></b>
+                </p>
+            </div>
+            <div class="col-md-12" data-ng-show="!changeResult && changeEncryptionclicked">
+                <p>
+                    <b><span data-translate>Change of the symmetric key failed! Please contact support!</span></b>
+                </p>
+            </div>
+        </div>
+        <div class="row" data-ng-hide="node.symm_crypt_activated">
+            <b>This function is disabled due to the using of PGP encryption.</b>
+        </div>
+    </div>
+</div>

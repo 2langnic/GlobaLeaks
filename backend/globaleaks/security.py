@@ -236,8 +236,16 @@ def encrypt_with_ServerKey (nonce,value):
     @return:
         the base64 encoded and encrypted version of the value
     """    
-    cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    return symm_encrypt_String(nonce,value,GLSetting.mainServerKey)
+
+def symm_encrypt_String (nonce,value,key):
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
     return b64encode(cipher.encryptor().update(value))
+
+def symm_decrypt_String (nonce, encrypted_value, key):
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
+    return returnvalue
 
 def get_b64_encoded_nonce():
     return b64encode(os.urandom(GLSetting.AES_counter_nonce))
@@ -251,9 +259,7 @@ def decrypt_with_ServerKey (nonce, encrypted_value):
     @return:
         the decrypted version of the encrypted_value
     """    
-    cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(nonce)), backend=default_backend())
-    returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
-    return returnvalue
+    return symm_decrypt_String(nonce, encrypted_value,GLSetting.mainServerKey)
 
 def create_symmetric_encryption_testFile(key):
     testFile = open(os.path.join(GLSetting.glfiles_path,'testFile.aes'),'w+b')

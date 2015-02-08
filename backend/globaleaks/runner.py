@@ -39,7 +39,7 @@ def start_asynchronous():
     session_management = session_management_sched.SessionManagementSchedule()
     delivery = delivery_sched.DeliverySchedule()
     notification = notification_sched.NotificationSchedule()
-    clean = cleaning_sched.CleaningSchedule()
+    
 
 
     # here we prepare the schedule:
@@ -49,11 +49,13 @@ def start_asynchronous():
     reactor.callLater(0, session_management.start, GLSetting.session_management_minutes_delta * 60)  # @UndefinedVariable
     reactor.callLater(10, delivery.start, GLSetting.delivery_seconds_delta)  # @UndefinedVariable
     reactor.callLater(20, notification.start, GLSetting.notification_minutes_delta * 60)  # @UndefinedVariable
-    reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)  # @UndefinedVariable
     if not checkSymmCryptActivated():
         #This task will never be started when the symmetric encryption is enabled
         pgp_check = pgp_check_sched.PGPCheckSchedule()
         reactor.callLater(60, pgp_check.start, GLSetting.pgp_check_hours_delta * 3600)  # @UndefinedVariable
+        #TODO JH added cleaning due to cleaning while reencrypting
+        clean = cleaning_sched.CleaningSchedule()
+        reactor.callLater(30, clean.start, GLSetting.cleaning_hours_delta * 3600)  # @UndefinedVariable
 
 
     # anti flood protection, anomaly collection, stats

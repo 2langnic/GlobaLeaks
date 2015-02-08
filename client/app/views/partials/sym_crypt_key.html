@@ -19,7 +19,7 @@
             <p class="has-error" data-ng-show="!validSymKeyLength">
                 <span data-translate>For a 256 Bit symmetric encryption a key with 32 ASCII characters is needed!</span>
             </p>
-            <p class="has-error" data-ng-show="wrongkey">
+            <p class="has-error" data-ng-show="!correct_key && clickedCheckEncryptionKey">
                 <span data-translate>The entered encryption key does not match the key on the server or the key has already been set.</span>
             </p>
         </div>

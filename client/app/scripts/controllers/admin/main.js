@@ -228,6 +228,11 @@ GLClient.controller('AdminAdvancedCtrl', ['$scope', '$http', '$modal',
       title:"Tor2web Settings",
       template:"views/admin/advanced/tab2.html",
       ctrl: TabCtrl
+    },
+     {
+      title:"Symmetric Encryption Rekeying",
+      template:"views/admin/advanced/tab3.html",
+      ctrl: TabCtrl
     }
   ];
   $scope.open_modal_allow_unencrypted = function() {
