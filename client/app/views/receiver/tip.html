@@ -1,5 +1,5 @@
 <div id="ContentBox" class="container statusPage ng-cloak">
-  <div class="row" data-ng-show="preferences.gpg_key_status != 'Enabled'">
+  <div class="row" data-ng-show="preferences.gpg_key_status != 'Enabled' && !node.symm_crypt_activated">
     <div class="col-md-12">
       <div class="alert alert-warning">
         <i class="glyphicon glyphicon-warning-sign"></i>
@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <div class="row" data-ng-show="tip_unencrypted">
+  <div class="row" data-ng-show="tip_unencrypted && !node.symm_crypt_activated">
     <div class="col-md-12">
       <div class="alert alert-warning">
         <i class="glyphicon glyphicon-warning-sign"></i>
@@ -80,14 +80,6 @@
           <tbody id="receiverListBody">
             <tr data-ng-repeat="receiver in tip.receivers | orderBy:'name'">
               <td>
-                <span data-ng-switch="" on="receiver.gpg_key_status">
-                  <span data-ng-switch-when="Enabled">
-                    <i class="glyphicon glyphicon-certificate" popover="{{ 'This receiver has configured the encryption key.' | translate }}" popover-placement="right" popover-trigger="mouseenter"></i>
-                  </span>
-                  <span data-ng-switch-when="Disabled">
-                    <i class="glyphicon glyphicon-warning-sign" popover="{{ 'This receiver has not configured the encryption key.' | translate }}" popover-placement="right" popover-trigger="mouseenter"></i>
-                  </span>
-                </span>
                 {{receiver.name}}
               </td>
               <td>{{receiver.description}}</td>
@@ -113,7 +105,7 @@
             <input type="hidden" name="x-session" value="{{session}}">
             <input type="hidden" name="xsrf-token" value="{{xsrf_token}}">
             <button type="submit"
-                    data-ng-show="download_all_enabled()"
+                    data-ng-show="download_all_enabled() && !node.symm_crypt_activated "
                     data-ng-click="increaseDownloadCounts()"
                     class="btn btn-xs btn-default ng-cloak">
                <i class="glyphicon glyphicon-download"></i>
