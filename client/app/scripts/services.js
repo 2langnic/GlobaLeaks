@@ -942,6 +942,7 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
         receiver.description = '';
         receiver.mail_address = '';
         receiver.can_delete_submission = false;
+        receiver.can_modify_tip_receivers = false;
         receiver.postpone_superpower = false;
         receiver.tip_notification = true;
         receiver.file_notification = true;

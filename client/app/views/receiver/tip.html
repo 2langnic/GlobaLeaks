@@ -68,7 +68,7 @@
       <br />
 
       <div class="col-md-12">
-        <h3 data-translate>Receiver List</h3>
+        <h3 data-translate>List of current Receivers</h3>
         <table class="table table-striped" id="receiverList">
           <thead>
             <tr>
@@ -84,6 +84,31 @@
               </td>
               <td>{{receiver.description}}</td>
               <td>{{receiver.access_counter}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+    <div class="col-md-12" data-ng-if = "receiverPreferences.can_modify_tip_receivers">
+        <h3 data-translate>Receiver List</h3>
+        <table class="table table-striped" id="receiverControl">
+          <thead>
+            <tr>
+              <th><span data-translate>ID</span></th>
+              <th><span data-translate>Name</span></th>
+              <th><span data-translate>Modify</span></th>
+            </tr>
+          </thead>
+          <tbody id="receiverAllListBody">
+            <tr data-ng-repeat="allreceiver in receivers | orderBy:'name'">
+              <td>{{allreceiver.id}}</td>
+              <td>
+                {{allreceiver.name}}
+              </td>
+              <td>
+                  <button type="submit" class="btn btn-success" data-ng-click="addReceiver(allreceiver)"> Add to tip</button>
+                  <button type="submit" class="btn btn-danger" data-ng-click="removeReceiver(allreceiver)"> Remove from tip </button>
+              </td>
             </tr>
           </tbody>
         </table>

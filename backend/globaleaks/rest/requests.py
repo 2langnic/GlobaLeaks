@@ -96,6 +96,11 @@ actorsTipOpsDesc = {
     'extend': bool,
 }
 
+receiverConfig = {
+    'action' : unicode,
+    'receiverID': unicode,
+}
+
 adminStepDesc = {
     'label': unicode,
     'hint': unicode,
@@ -218,6 +223,7 @@ adminReceiverDesc = {
     'description': unicode,
     'contexts': [ uuid_regexp ],
     'can_delete_submission': bool,
+    'can_modify_tip_receivers': bool,
     'postpone_superpower': bool,
     'tip_notification': bool,
     'file_notification': bool,

@@ -650,6 +650,7 @@ class Receiver(Model):
     # Admin chosen options
     can_delete_submission = Bool()
     postpone_superpower = Bool()
+    can_modify_tip_receivers = Bool()
 
     last_update = DateTime()
 
@@ -672,7 +673,7 @@ class Receiver(Model):
     unicode_keys = ['name', 'mail_address', 'configuration']
     localized_strings = ['description']
     int_keys = ['presentation_order']
-    bool_keys = ['can_delete_submission', 'tip_notification',
+    bool_keys = ['can_delete_submission', 'can_modify_tip_receivers', 'tip_notification',
                  'comment_notification', 'file_notification',
                  'message_notification', 'postpone_superpower']
 

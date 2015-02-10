@@ -28,6 +28,7 @@ def receiver_serialize_receiver(receiver, language=GLSetting.memory_copy.default
         "update_date": datetime_to_ISO8601(receiver.last_update),
         "creation_date": datetime_to_ISO8601(receiver.creation_date),
         "can_delete_submission": receiver.can_delete_submission,
+        "can_modify_tip_receivers": receiver.can_modify_tip_receivers,
         "username": receiver.user.username,
         "gpg_key_info": receiver.gpg_key_info,
         "gpg_key_fingerprint": receiver.gpg_key_fingerprint,
@@ -199,6 +200,7 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
             'your_messages' : your_messages,
             'postpone_superpower': postpone_superpower,
             'can_delete_submission': can_delete_submission,
+            'can_modify_tip_receivers': rtip.receiver.can_modify_tip_receivers,
         })
 
         mo = Rosetta(rtip.internaltip.context.localized_strings)

@@ -232,6 +232,7 @@ def admin_serialize_receiver(receiver, language=GLSetting.memory_copy.default_la
         "creation_date": datetime_to_ISO8601(receiver.creation_date),
         "last_update": datetime_to_ISO8601(receiver.last_update),
         "can_delete_submission": receiver.can_delete_submission,
+        "can_modify_tip_receivers": receiver.can_modify_tip_receivers,
         "postpone_superpower": receiver.postpone_superpower,
         "username": receiver.user.username,
         "user_id": receiver.user.id,

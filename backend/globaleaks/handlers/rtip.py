@@ -18,7 +18,8 @@ from globaleaks.utils.utility import log, utc_future_date, datetime_now, \
 
 from globaleaks.utils.structures import Rosetta
 from globaleaks.settings import transact, transact_ro, GLSetting
-from globaleaks.models import Node, Comment, ReceiverFile, Message, InternalTip
+from globaleaks.models import Node, Comment, ReceiverFile, Message, InternalTip,\
+    ReceiverTip, InternalFile
 from globaleaks.rest import errors
 from globaleaks.security import access_tip
 
@@ -27,6 +28,8 @@ from cryptography.hazmat.backends import default_backend
 
 from pickle import loads, dumps
 from globaleaks import security
+from globaleaks.jobs.delivery_sched import create_receivertip,\
+    create_receiver_file
 
 def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):    
     ret_dict = {
@@ -131,6 +134,8 @@ def get_internaltip_receiver(store, user_id, tip_id, language=GLSetting.memory_c
     tip_desc['can_delete_submission'] = (node.can_delete_submission or
                                          rtip.internaltip.context.can_delete_submission or
                                          rtip.receiver.can_delete_submission)
+    
+    tip_desc['can_modify_tip_receivers'] = rtip.receiver.can_modify_tip_receivers
 
     return tip_desc
 
@@ -256,6 +261,110 @@ def postpone_expiration_date(store, user_id, tip_id):
 
     rtip.internaltip.comments.add(comment)
 
+@transact
+def addReceivertoTip(store, tip_id, receiverID):
+    print "entering addReceiverToTip"
+    # Check if the receiver is not already a receiver of the tip
+    try:
+        rtip_check = store.find(ReceiverTip, ReceiverTip.id == unicode(tip_id)).one()
+        for rtip in rtip_check.internaltip.receivertips:
+            if rtip.receiver.id == receiverID:
+                return True
+        
+        # Create a new newReceiverTip
+        newReceiverTip = ReceiverTip()
+        newReceiverTip.creation_date_nonce = security.get_b64_encoded_nonce()
+        newReceiverTip.creation_date = security.encrypt_with_ServerKey(newReceiverTip.creation_date_nonce,dumps(datetime_now()))
+        
+        newReceiverTip.last_access_nonce = security.get_b64_encoded_nonce()
+        newReceiverTip.last_access = security.encrypt_with_ServerKey(newReceiverTip.last_access_nonce,dumps(datetime_now()))
+        # Set it to the user
+        newReceiverTip.receiver_id = receiverID
+        # Find internalTipId from over given ReceiverTip ID
+        rtip_old = store.find(ReceiverTip, ReceiverTip.id == unicode(tip_id)).one()
+        newReceiverTip.internaltip_id = rtip_old.internaltip.id
+        
+        # Set Access counter
+        newReceiverTip.access_counter = 0
+        # Set the mark
+        newReceiverTip.mark = u'not notified'
+        # Added it into db
+        store.add(newReceiverTip)
+        
+        # for all Files : Add them to receiverTip
+        
+        internalFilesList = store.find(InternalFile,InternalFile.internaltip_id == rtip_old.internaltip.id)
+        for internalFile in internalFilesList:
+            create_receiver_file(receiverID, internalFile.id)
+            
+    except Exception as err:
+        log.err("Error in addReceiverToTip " + str(err))
+        return False
+    
+    return True
+
+
+@transact
+def removeReceiverFromTip(store, tip_id, receiverID):
+    # Check if the receiver is a receiver of the tip
+    try:
+        isReceiverInTip = False
+        
+        rtip_check = store.find(ReceiverTip, ReceiverTip.id == unicode(tip_id)).one()
+        internaltip = rtip_check.internaltip
+        for rtip in rtip_check.internaltip.receivertips:
+            if rtip.receiver.id == receiverID:
+                rtip_to_delete = rtip 
+                isReceiverInTip = True
+        # if the Receiver is not in the tip just go back
+        if not isReceiverInTip:
+            return True
+        store.remove(rtip_to_delete)
+        
+        if (internaltip.receivertips.count() == 0):
+            log.debug("There are no more receiver on the internal tip " + str(rtip.internaltip.id)+" so removing it")
+            store.remove(rtip.internaltip)
+    except Exception as err:
+        log.err("Error in remove Receiver from Tip" + str(err))
+        return False
+    
+    return True
+
+@transact
+def checkDeleteSelfFromTip(store, tip_id, receiverID):
+    rtip_check = store.find(ReceiverTip, ReceiverTip.id == unicode(tip_id)).one()
+    if (rtip_check.receiver_id == receiverID):
+        return True
+    return False
+
+class ReceiverConfig(BaseHandler):
+    """
+    This interface handles the changes of the receiver in an existing tip
+    """
+    @transport_security_check('receiver')
+    @authenticated('receiver')
+    @inlineCallbacks
+    def post(self, tip_id, *uriargs):
+        """
+        
+        """
+        request = self.validate_message(self.request.body, requests.receiverConfig)
+        if request['action'] == "add":
+            receiverID = request['receiverID'] 
+            addReceivertoTip(tip_id,receiverID)
+            answer  = yield  get_receiver_list_receiver(self.current_user.user_id, tip_id, self.request.language)
+            
+        if request['action'] == "remove": 
+            receiverID = request['receiverID'] 
+            checkDeleteSelf = yield checkDeleteSelfFromTip(tip_id,receiverID)
+            removeReceiverFromTip(tip_id, receiverID)
+            if checkDeleteSelf:
+                answer = {}
+            else:
+                answer  = yield  get_receiver_list_receiver(self.current_user.user_id, tip_id, self.request.language)
+        self.set_status(202) # Updated
+        self.finish(answer)
+   
 
 class RTipInstance(BaseHandler):
     """
@@ -426,6 +535,7 @@ def get_receiver_list_receiver(store, user_id, tip_id, language=GLSetting.memory
         receiver_desc = {
             "gpg_key_status": rtip.receiver.gpg_key_status,
             "can_delete_submission": rtip.receiver.can_delete_submission,
+            "can_modify_tip_receivers": rtip.receiver.can_modify_tip_receivers,
             "name": unicode(rtip.receiver.name),
             "receiver_id": unicode(rtip.receiver.id),
             "access_counter": rtip.access_counter,

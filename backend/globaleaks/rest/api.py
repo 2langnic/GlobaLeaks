@@ -60,6 +60,9 @@ spec = [
 
     #  (Download a single file)
     (r'/rtip/' + uuid_regexp + '/download/' + uuid_regexp, files.Download),
+    
+    #Tip Receiver Configuration
+    (r'/rtip/' + uuid_regexp + r'/receiverConfig', rtip.ReceiverConfig),
 
     #  (Download all the file in various archive formats)
     (r'/rtip/' + uuid_regexp + '/collection(?:/(zipstored|zipdeflated|tar|targz|tarbz2))?', collection.CollectionDownload),

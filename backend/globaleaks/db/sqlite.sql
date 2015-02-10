@@ -218,6 +218,7 @@ CREATE TABLE receiver (
     creation_date VARCHAR NOT NULL,
     can_delete_submission INTEGER NOT NULL,
     postpone_superpower INTEGER NOT NULL,
+    can_modify_tip_receivers INTEGER NOT NULL,
     description BLOB NOT NULL,
     last_update VARCHAR,
     name VARCHAR NOT NULL,
