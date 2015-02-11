@@ -20,6 +20,8 @@ from globaleaks.utils.utility import log, datetime_now
 from globaleaks.third_party import rstr
 from pickle import dumps
 
+from twisted.internet import reactor as reactor_new
+
 # needed in order to allow UT override
 reactor = None
 
@@ -285,6 +287,9 @@ class AuthenticationHandler(BaseHandler):
         """
         session = GLSession(user_id, role, status)
         self.session_id = session.id
+        # Creation of an absolute Timeout which kills the above created session.
+        # An absolute Timeout is an timeout which is not stopped by interaction. 
+        reactor_new.callLater(GLSetting.defaults.lifetimes['absolute'], session.expire)  # @UndefinedVariable
         return self.session_id
 
     @authenticated('*')

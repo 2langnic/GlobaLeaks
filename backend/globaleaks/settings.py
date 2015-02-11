@@ -248,7 +248,8 @@ class GLSettingsClass:
         self.defaults.lifetimes = {
             'admin': (60 * 60),
             'receiver': (60 * 60),
-            'wb': (60 * 60)
+            'wb': (60 * 60),
+            'absolute': (24 * 60 * 60) #24 h
         }
 
         # unchecked_tor_input contains information that cannot be validated now
