@@ -30,7 +30,7 @@ from globaleaks.utils.utility import log, datetime_now, datetime_null, seconds_c
 from globaleaks.utils import utility
 from globaleaks.runner import start_asynchronous
 from globaleaks.models import InternalTip, InternalFile, ReceiverFile,\
-    ReceiverTip, Message, Comment
+    ReceiverTip, Message, Comment, WhistleblowerTip
 from pickle import loads, dumps
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import algorithms, modes
@@ -1057,6 +1057,18 @@ def rekeyAll(store,newKey):
             unencrypted_type = security.decrypt_with_ServerKey(comment.type_nonce, comment.type)
             comment.type = security.symm_encrypt_String(comment.type_nonce, unencrypted_type,newKey)
         
+        # Recrypt of WhistleblowerTip
+        wbtips = store.find(WhistleblowerTip)
+        for wbtip in wbtips:
+            
+            # Creation Date
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(wbtip.creation_date_nonce, wbtip.creation_date)
+            wbtip.creation_date = security.encrypt_binary(wbtip.creation_date_nonce, unencrypted_creation_date,newKey)
+            
+            # Last Access
+            unencrypted_last_access = security.decrypt_binary_with_ServerKey(wbtip.last_access_nonce, wbtip.last_access)
+            wbtip.last_access = security.encrypt_binary(wbtip.last_access_nonce, unencrypted_last_access,newKey)
+            
         # set the main key to the new key
         GLSetting.mainServerKey = newKey;
         # create TestFile

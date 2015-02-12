@@ -17,6 +17,7 @@ from globaleaks import models, security
 from globaleaks.utils.utility import log, datetime_to_ISO8601
 from globaleaks.utils.structures import Rosetta
 from pickle import loads
+from globaleaks.models import Node
 
 @transact_ro
 def collect_tip_overview(store, language=GLSetting.memory_copy.default_language):
@@ -60,16 +61,16 @@ def collect_tip_overview(store, language=GLSetting.memory_copy.default_language)
 
         for ifile in itip.internalfiles:
             tip_description['internalfiles'].append({
-                'name': ifile.name,
-                'size': ifile.size,
+              'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
+              'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
+              'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
                 'status': ifile.mark,
-                'content_type': ifile.content_type
             })
 
         for comment in itip.comments:
             tip_description['comments'].append({
                 'type': comment.type,
-                'lifetime': datetime_to_ISO8601(comment.creation_date),
+                'lifetime': datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(comment.creation_date_nonce,comment.creation_date))),
             })
 
         # whistleblower tip has not a reference from itip, then:
@@ -117,9 +118,8 @@ def collect_users_overview(store):
 
             user_description['receiverfiles'].append({
                 'id': rfile.id,
-                'file_name': rfile.internalfile.name,
+                'file_name': security.decrypt_with_ServerKey(rfile.internalfile.name_nonce,rfile.internalfile.name),
                 'downloads': rfile.downloads,
-                'last_access': datetime_to_ISO8601(rfile.last_access),
                 'status': rfile.mark,
             })
 
@@ -187,41 +187,43 @@ def collect_files_overview(store):
 
         file_description_list.append(file_desc)
 
-    # remaining files are checked for rfile presence
-    for rfile in stored_rfiles:
-
-        file_desc = {
-            'id': rfile.internalfile.id,
-            'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
-            'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
-            'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
-            'itip': rfile.internaltip_id,
-            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date))),
-            'rfiles': 1,
-            'stored': None,
-            'path': '',
-        }
-
-        if os.path.isfile(rfile.file_path):
-
-            file_desc['stored'] = True
-            file_desc['path'] = rfile.file_path
-
-            # disk_files contains all the files present in the submission_dir
-            # we remove the InternalFiles one by one, and the goal is to keep
-            # in disk_files all the not referenced files.
-            filename = os.path.basename(rfile.file_path)
-
-            if filename in disk_files:
-                disk_files.remove(filename)
-
-        else:
-            if ifile.mark == 'encrypted' or ifile.mark == 'reference':
-                log.err("ReceiverFile %s references a not existent file: %s" %
-                        (file_desc['id'], rfile.file_path) )
-            file_desc['stored'] = False
-
-        file_description_list.append(file_desc)
+    node = store.find(Node).one()
+    if not node.symm_crypt_activated:
+        # remaining files are checked for rfile presence, if symmetric is not activated
+        for rfile in stored_rfiles:
+    
+            file_desc = {
+                'id': rfile.internalfile.id,
+                'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
+                'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
+                'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
+                'itip': rfile.internaltip_id,
+                'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date))),
+                'rfiles': 1,
+                'stored': None,
+                'path': '',
+            }
+    
+            if os.path.isfile(rfile.file_path):
+    
+                file_desc['stored'] = True
+                file_desc['path'] = rfile.file_path
+    
+                # disk_files contains all the files present in the submission_dir
+                # we remove the InternalFiles one by one, and the goal is to keep
+                # in disk_files all the not referenced files.
+                filename = os.path.basename(rfile.file_path)
+    
+                if filename in disk_files:
+                    disk_files.remove(filename)
+    
+            else:
+                if ifile.mark == 'encrypted' or ifile.mark == 'reference':
+                    log.err("ReceiverFile %s references a not existent file: %s" %
+                            (file_desc['id'], rfile.file_path) )
+                file_desc['stored'] = False
+    
+            file_description_list.append(file_desc)
 
 
     # remaining files are the file not tracked by any internalfile/receiverfile
