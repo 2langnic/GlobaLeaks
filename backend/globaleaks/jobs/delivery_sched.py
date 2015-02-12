@@ -224,7 +224,7 @@ def receiverfile_create(store, if_path, recv_path, status, recv_size, receiver_d
 
         receiverfile = ReceiverFile()
         receiverfile.creation_date_nonce = security.get_b64_encoded_nonce()
-        receiverfile.creation_date = security.encrypt_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
+        receiverfile.creation_date = security.encrypt_binary_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
     
         receiverfile.downloads = 0
         receiverfile.receiver_id = receiver_desc['id']
@@ -262,10 +262,10 @@ def create_receivertip(store, receiver, internaltip):
 
     receivertip = ReceiverTip()
     receivertip.creation_date_nonce = security.get_b64_encoded_nonce()
-    receivertip.creation_date = security.encrypt_with_ServerKey(receivertip.creation_date_nonce,dumps(datetime_now()))
+    receivertip.creation_date = security.encrypt_binary_with_ServerKey(receivertip.creation_date_nonce,dumps(datetime_now()))
     
     receivertip.last_access_nonce = security.get_b64_encoded_nonce()
-    receivertip.last_access = security.encrypt_with_ServerKey(receivertip.last_access_nonce,dumps(datetime_now()))
+    receivertip.last_access = security.encrypt_binary_with_ServerKey(receivertip.last_access_nonce,dumps(datetime_now()))
     
     
     receivertip.internaltip_id = internaltip.id
@@ -383,7 +383,7 @@ def create_receiver_file(store,receiver_id,InternalFile_id):
     
     receiverfile = ReceiverFile()
     receiverfile.creation_date_nonce = security.get_b64_encoded_nonce()
-    receiverfile.creation_date = security.encrypt_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
+    receiverfile.creation_date = security.encrypt_binary_with_ServerKey(receiverfile.creation_date_nonce,dumps(datetime_now()))
     internalFile = store.find(InternalFile,InternalFile.id ==InternalFile_id).one()
     
     

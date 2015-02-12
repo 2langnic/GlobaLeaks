@@ -38,7 +38,7 @@ def serialize_file(internalfile):
         'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
         'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
         'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
         'id' : internalfile.id,
         'mark' : internalfile.mark,
     }
@@ -55,7 +55,7 @@ def serialize_receiver_file(receiverfile):
         # Also here renaming
         #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
         'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
         'downloads' : receiverfile.downloads,
         'path' : receiverfile.file_path,
         'nonce':receiverfile.file_encryption_nonce,
@@ -89,7 +89,7 @@ def register_file_db(store, uploaded_file, filepath, internaltip_id):
     # Encryption date
     new_file.creation_date_nonce = security.get_b64_encoded_nonce()
     
-    new_file.creation_date = security.encrypt_with_ServerKey(new_file.creation_date_nonce,dumps(datetime_now()))
+    new_file.creation_date = security.encrypt_binary_with_ServerKey(new_file.creation_date_nonce,dumps(datetime_now()))
     
     new_file.internaltip_id = internaltip_id
     new_file.file_path = filepath

@@ -189,9 +189,9 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
 
         single_tip_sum = dict({
             'id' : rtip.id,
-            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.creation_date_nonce,rtip.creation_date))),
-            'last_access' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.last_access_nonce,rtip.last_access))),
-            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date))),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(rtip.creation_date_nonce,rtip.creation_date))),
+            'last_access' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(rtip.last_access_nonce,rtip.last_access))),
+            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date))),
             'access_counter': rtip.access_counter,
             'files_number': rfiles_n,
             'comments_number': rtip.internaltip.comments.count(),

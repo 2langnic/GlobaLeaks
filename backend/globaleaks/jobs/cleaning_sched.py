@@ -43,8 +43,8 @@ def get_tiptime_by_marker(store, marker):
 
         serialized_tipinfo = {
             'id': itip.id,
-            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(itip.creation_date_nonce,itip.creation_date))),
-            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(itip.expiration_date_nonce,itip.expiration_date))),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(itip.creation_date_nonce,itip.creation_date))),
+            'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(itip.expiration_date_nonce,itip.expiration_date))),
             'tip_life_seconds':  tip_timetolive,
             'submission_life_seconds':  submission_timetolive,
             'files': files_cnt,

@@ -920,35 +920,35 @@ def rekeyAll(store,newKey):
         for internaltip in internalTipsList:
             
             # Steps
-            unencrypted_internal = security.decrypt_with_ServerKey(internaltip.wb_steps_nonce, internaltip.wb_steps)
-            internaltip.wb_steps = security.symm_encrypt_String(internaltip.wb_steps_nonce, unencrypted_internal,newKey)
+            unencrypted_internal = security.decrypt_binary_with_ServerKey(internaltip.wb_steps_nonce, internaltip.wb_steps)
+            internaltip.wb_steps = security.encrypt_binary(internaltip.wb_steps_nonce, unencrypted_internal,newKey)
             
             # Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(internaltip.creation_date_nonce, internaltip.creation_date)
-            internaltip.creation_date = security.symm_encrypt_String(internaltip.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(internaltip.creation_date_nonce, internaltip.creation_date)
+            internaltip.creation_date = security.encrypt_binary(internaltip.creation_date_nonce, unencrypted_creation_date,newKey)
             
             # Expiration Date
-            unencrypted_expiration_date = security.decrypt_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
-            internaltip.expiration_date = security.symm_encrypt_String(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
+            unencrypted_expiration_date = security.decrypt_binary_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
+            internaltip.expiration_date = security.encrypt_binary(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
         
         # This is needed for the admin statistics
         internalTipsList = store.find(InternalTip, InternalTip.mark == u'submission')
         for internaltip in internalTipsList:
             # Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(internaltip.creation_date_nonce, internaltip.creation_date)
-            internaltip.creation_date = security.symm_encrypt_String(internaltip.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(internaltip.creation_date_nonce, internaltip.creation_date)
+            internaltip.creation_date = security.encrypt_binary(internaltip.creation_date_nonce, unencrypted_creation_date,newKey)
             
             # Expiration Date
-            unencrypted_expiration_date = security.decrypt_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
-            internaltip.expiration_date = security.symm_encrypt_String(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
+            unencrypted_expiration_date = security.decrypt_binary_with_ServerKey(internaltip.expiration_date_nonce, internaltip.expiration_date)
+            internaltip.expiration_date = security.encrypt_binary(internaltip.expiration_date_nonce, unencrypted_expiration_date,newKey)
         
         
         internalFilesList = store.find(InternalFile)
         for internalFile in internalFilesList:
             
             # Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(internalFile.creation_date_nonce, internalFile.creation_date)
-            internalFile.creation_date = security.symm_encrypt_String(internalFile.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(internalFile.creation_date_nonce, internalFile.creation_date)
+            internalFile.creation_date = security.encrypt_binary(internalFile.creation_date_nonce, unencrypted_creation_date,newKey)
            
             # Name
             unencrypted_name = security.decrypt_with_ServerKey(internalFile.name_nonce,internalFile.name)
@@ -960,7 +960,7 @@ def rekeyAll(store,newKey):
             
             # Size
             unencrypted_size = security.decrypt_with_ServerKey(internalFile.size_nonce,internalFile.size)
-            internalFile.size= security.symm_encrypt_String(internalFile.size_nonce,  unencrypted_size,newKey)
+            internalFile.size= security.symm_encrypt_String(internalFile.size_nonce, unencrypted_size,newKey)
             
             # Files
             
@@ -1004,18 +1004,18 @@ def rekeyAll(store,newKey):
         for receiverFile in receiverFiles:
             
             # Only Creation Date, name and so on are taken from internalfile
-            unencrypted_creation_date = security.decrypt_with_ServerKey(receiverFile.creation_date_nonce, receiverFile.creation_date)
-            receiverFile.creation_date = security.symm_encrypt_String(receiverFile.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(receiverFile.creation_date_nonce, receiverFile.creation_date)
+            receiverFile.creation_date = security.encrypt_binary(receiverFile.creation_date_nonce, unencrypted_creation_date,newKey)
          
         receiverTipList = store.find(ReceiverTip)
         for receiverTip in receiverTipList:
             
             #Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(receiverTip.creation_date_nonce, receiverTip.creation_date)
-            receiverTip.creation_date = security.symm_encrypt_String(receiverTip.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(receiverTip.creation_date_nonce, receiverTip.creation_date)
+            receiverTip.creation_date = security.encrypt_binary(receiverTip.creation_date_nonce, unencrypted_creation_date,newKey)
             # Last Access
-            unencrypted_last_access = security.decrypt_with_ServerKey(receiverTip.last_access_nonce, receiverTip.last_access)
-            receiverTip.last_access = security.symm_encrypt_String(receiverTip.last_access_nonce, unencrypted_last_access,newKey)
+            unencrypted_last_access = security.decrypt_binary_with_ServerKey(receiverTip.last_access_nonce, receiverTip.last_access)
+            receiverTip.last_access = security.encrypt_binary(receiverTip.last_access_nonce, unencrypted_last_access,newKey)
     
         # Recrypt of Messages
         messages = store.find(Message)
@@ -1030,8 +1030,8 @@ def rekeyAll(store,newKey):
             message.content = security.symm_encrypt_String(message.content_nonce, unencrypted_content,newKey)
             
             # Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(message.creation_date_nonce, message.creation_date)
-            message.creation_date = security.symm_encrypt_String(message.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(message.creation_date_nonce, message.creation_date)
+            message.creation_date = security.encrypt_binary(message.creation_date_nonce, unencrypted_creation_date,newKey)
             
             # Type
             unencrypted_type = security.decrypt_with_ServerKey(message.type_nonce, message.type)
@@ -1050,8 +1050,8 @@ def rekeyAll(store,newKey):
             comment.content = security.symm_encrypt_String(comment.content_nonce, unencrypted_content,newKey)
             
             # Creation Date
-            unencrypted_creation_date = security.decrypt_with_ServerKey(comment.creation_date_nonce, comment.creation_date)
-            comment.creation_date = security.symm_encrypt_String(comment.creation_date_nonce, unencrypted_creation_date,newKey)
+            unencrypted_creation_date = security.decrypt_binary_with_ServerKey(comment.creation_date_nonce, comment.creation_date)
+            comment.creation_date = security.encrypt_binary(comment.creation_date_nonce, unencrypted_creation_date,newKey)
             
             # Type
             unencrypted_type = security.decrypt_with_ServerKey(comment.type_nonce, comment.type)
@@ -1137,11 +1137,11 @@ class SymmKey(BaseHandler):
             self.finish(answer)
         else:
             try:
-                key_check_successful =  security.test_symmetric_encryption_testFile(request['key'])
+                key_check_successful =  yield security.test_symmetric_encryption_testFile(request['key'])
             except Exception as e:
                 log.debug("Error in test_symmetric_encryption_testFile:" + str(e))
             if key_check_successful:
-                rekeySuccessful = rekeyAll(request['newKey'])
+                rekeySuccessful = yield rekeyAll(request['newKey'])
             
             answer  = {
                        'key_change_successful' : rekeySuccessful

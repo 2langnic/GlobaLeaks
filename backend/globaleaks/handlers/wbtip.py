@@ -29,12 +29,12 @@ from globaleaks import security
 def wb_serialize_tip(internaltip, language=GLSetting.memory_copy.default_language):
     ret_dict = {
         'context_id': internaltip.context.id,
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
-        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
+        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
-        'wb_steps' : loads(security.decrypt_with_ServerKey(internaltip.wb_steps_nonce,internaltip.wb_steps)),
+        'wb_steps' : loads(security.decrypt_binary_with_ServerKey(internaltip.wb_steps_nonce,internaltip.wb_steps)),
         'enable_private_messages' : internaltip.context.enable_private_messages,
         'show_receivers': internaltip.context.show_receivers, 
     }
@@ -54,7 +54,7 @@ def wb_serialize_file(internalfile):
         'id': internalfile.id,
         'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
         'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
         'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
     }
     return wb_file_desc
@@ -128,7 +128,7 @@ def wb_serialize_comment(comment):
         'content' : security.decrypt_with_ServerKey(comment.content_nonce,comment.content),
         'system_content' : comment.system_content if comment.system_content else {},
         'author' : security.decrypt_with_ServerKey(comment.author_nonce,comment.author),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
     }
     return comment_desc
 
@@ -159,17 +159,17 @@ def create_comment_wb(store, wb_tip_id, request):
     comment = Comment()
     
     comment.creation_date_nonce = security.get_b64_encoded_nonce()
-    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    comment.creation_date = security.encrypt_binary_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
     
     comment.content_nonce = security.get_b64_encoded_nonce()
-    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str(request['content']))
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, request['content'])
     
     comment.internaltip_id = wbtip.internaltip.id
     
     comment.author_nonce = security.get_b64_encoded_nonce()
     comment.author =security.encrypt_with_ServerKey(comment.author_nonce, "whistleblower") # The printed line
     comment.type_nonce = security.get_b64_encoded_nonce()
-    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[1])) # WB
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, Comment._types[1]) # WB
     comment.mark = Comment._marker[0] # Not notified
 
     wbtip.internaltip.comments.add(comment)
@@ -241,7 +241,7 @@ def get_receiver_list_wb(store, wb_tip_id, language=GLSetting.memory_copy.defaul
 
         log.debug("Early access from the WB to the Tip (creation_date: %s UTC),"\
                   " Receiver not yet present: fallback on receiver list" %
-                  datetime_to_pretty_str(loads(security.decrypt_with_ServerKey(wb_tip.creation_date_nonce,wb_tip.creation_date))))
+                  datetime_to_pretty_str(loads(security.decrypt_binary_with_ServerKey(wb_tip.creation_date_nonce,wb_tip.creation_date))))
 
         for receiver in wb_tip.internaltip.receivers:
 
@@ -329,7 +329,7 @@ class WBTipReceiversCollection(BaseHandler):
 def wb_serialize_message(msg):
     return {
         'id' : msg.id,
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
         'content' : security.decrypt_with_ServerKey(msg.content_nonce,msg.content),
         'visualized' : msg.visualized,
         'type' : security.decrypt_with_ServerKey(msg.type_nonce,msg.type),
@@ -392,7 +392,7 @@ def create_message_wb(store, wb_tip_id, receiver_id, request):
     msg.receivertip_id = rtip.id
     
     msg.content_nonce = security.get_b64_encoded_nonce()
-    msg.content = security.encrypt_with_ServerKey(msg.content_nonce,str(request['content']))
+    msg.content = security.encrypt_with_ServerKey(msg.content_nonce,request['content'])
     
     msg.author_nonce = security.get_b64_encoded_nonce()
     msg.author = security.encrypt_with_ServerKey(msg.author_nonce, "Whistleblower")
@@ -402,7 +402,7 @@ def create_message_wb(store, wb_tip_id, receiver_id, request):
     msg.type = security.encrypt_with_ServerKey(msg.type_nonce, "whistleblower")
     
     msg.creation_date_nonce = security.get_b64_encoded_nonce()
-    msg.creation_date = security.encrypt_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
+    msg.creation_date = security.encrypt_binary_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
     
     msg.mark = u'not notified'
 

@@ -26,10 +26,10 @@ from pickle import loads
 def serialize_receivertip(receiver_tip):
     rtip_dict = {
         'id': receiver_tip.id,
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(receiver_tip.creation_date_nonce,receiver_tip.creation_date))),
-        'last_access' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(receiver_tip.last_access_nonce,receiver_tip.last_access))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(receiver_tip.creation_date_nonce,receiver_tip.creation_date))),
+        'last_access' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(receiver_tip.last_access_nonce,receiver_tip.last_access))),
         'access_counter' : receiver_tip.access_counter,
-        'wb_steps' : loads(security.decrypt_with_ServerKey(receiver_tip.internaltip.wb_steps_nonce,receiver_tip.internaltip.wb_steps)),
+        'wb_steps' : loads(security.decrypt_binary_with_ServerKey(receiver_tip.internaltip.wb_steps_nonce,receiver_tip.internaltip.wb_steps)),
         'context_id': receiver_tip.internaltip.context.id,
     }
     return rtip_dict
@@ -39,7 +39,7 @@ def serialize_internalfile(ifile):
         'name' : security.decrypt_with_ServerKey(ifile.name_nonce, ifile.name),
         'size': security.decrypt_with_ServerKey(ifile.size_nonce,ifile.size),
         'content_type' : security.decrypt_with_ServerKey(ifile.content_type_nonce,ifile.content_type),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date)))
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(ifile.creation_date_nonce, ifile.creation_date)))
     }
     return rfile_dict
 

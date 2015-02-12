@@ -227,6 +227,29 @@ def change_password(base64_stored, old_password, new_password, salt_input):
 
     return hash_password(new_password, salt_input)
 
+
+def encrypt_binary_with_ServerKey(nonce,value):
+    """
+    This method is encrypting binary data (here dumps() data)
+    """
+    cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    return b64encode(cipher.encryptor().update(value))
+
+def encrypt_binary(nonce,value,key):
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    return b64encode(cipher.encryptor().update(value))
+    
+def decrypt_binary_with_ServerKey(nonce,encrypted_value):
+    """
+    This method is decrypting binary data (here dumps() data)
+    """
+    return decrypt_binary(nonce,encrypted_value,GLSetting.mainServerKey)
+
+def decrypt_binary(nonce,encrypted_value,key):
+    cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
+    returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
+    return returnvalue
+
 def encrypt_with_ServerKey (nonce,value):
     """
     This is the central encryption function for encrypting with a single AES key.
@@ -235,17 +258,21 @@ def encrypt_with_ServerKey (nonce,value):
     @param value: the value to encrypt
     @return:
         the base64 encoded and encrypted version of the value
-    """    
+    """   
     return symm_encrypt_String(nonce,value,GLSetting.mainServerKey)
 
 def symm_encrypt_String (nonce,value,key):
+    #This encoding is for the cipher module 
+    value_new = value.encode('utf-8-sig')
     cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
-    return b64encode(cipher.encryptor().update(value))
+    # This encryption is for saving the encryption string into the db
+    return b64encode(cipher.encryptor().update(value_new))
 
 def symm_decrypt_String (nonce, encrypted_value, key):
     cipher = Cipher(algorithms.AES(str(key)), modes.CTR(b64decode(nonce)), backend=default_backend())
     returnvalue = cipher.decryptor().update(b64decode(encrypted_value))
-    return returnvalue
+    returnvalue_new = returnvalue.decode('utf-8-sig')
+    return returnvalue_new
 
 def get_b64_encoded_nonce():
     return b64encode(os.urandom(GLSetting.AES_counter_nonce))

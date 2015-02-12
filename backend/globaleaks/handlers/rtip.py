@@ -34,12 +34,12 @@ from globaleaks.jobs.delivery_sched import create_receivertip,\
 def receiver_serialize_internal_tip(internaltip, language=GLSetting.memory_copy.default_language):    
     ret_dict = {
         'context_id': internaltip.context.id,
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
-        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internaltip.creation_date_nonce,internaltip.creation_date))),
+        'expiration_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internaltip.expiration_date_nonce,internaltip.expiration_date))),
         'download_limit' : internaltip.download_limit,
         'access_limit' : internaltip.access_limit,
         'mark' : internaltip.mark,
-        'wb_steps' : loads(security.decrypt_with_ServerKey(internaltip.wb_steps_nonce, internaltip.wb_steps)),
+        'wb_steps' : loads(security.decrypt_binary_with_ServerKey(internaltip.wb_steps_nonce, internaltip.wb_steps)),
         'global_delete' : False,
         # this field "inform" the receiver of the new expiration date that can
         # be set, only if PUT with extend = True is updated
@@ -76,7 +76,7 @@ def receiver_serialize_file(internalfile, receiverfile, receivertip_id):
             #'name' : ("%s.pgp" % internalfile.name) if receiverfile.status == u'encrypted' else internalfile.name,
             'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
             'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
-            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
             'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
             'downloads': receiverfile.downloads
             #TODO: Encryption of the filename and perhaps downloadcounter,creation_date and size
@@ -91,7 +91,7 @@ def receiver_serialize_file(internalfile, receiverfile, receivertip_id):
             'href' : "",
              'name' : security.decrypt_with_ServerKey(internalfile.name_nonce, internalfile.name),
             'content_type' : security.decrypt_with_ServerKey(internalfile.content_type_nonce,internalfile.content_type),
-            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
+            'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(internalfile.creation_date_nonce, internalfile.creation_date))),
             'size': security.decrypt_with_ServerKey(internalfile.size_nonce,internalfile.size),
             'downloads': unicode(receiverfile.downloads) # this counter is always valid
         }
@@ -145,7 +145,7 @@ def increment_receiver_access_count(store, user_id, tip_id):
 
     rtip.access_counter += 1
     rtip.last_access_nonce = security.get_b64_encoded_nonce()
-    rtip.last_access = security.encrypt_with_ServerKey(rtip.last_access_nonce,dumps(datetime_now()))
+    rtip.last_access = security.encrypt_binary_with_ServerKey(rtip.last_access_nonce,dumps(datetime_now()))
 
     if rtip.access_counter > rtip.internaltip.access_limit:
         raise errors.AccessLimitExceeded
@@ -168,7 +168,7 @@ def delete_receiver_tip(store, user_id, tip_id):
 
     comment = Comment()
     comment.creation_date_nonce = security.get_b64_encoded_nonce()
-    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    comment.creation_date = security.encrypt_binary_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
     
     comment.content_nonce = security.get_b64_encoded_nonce()
     comment.content = security.encrypt_with_ServerKey(comment.content_nonce, "%s personally remove from this Tip" % rtip.receiver.name)
@@ -180,7 +180,7 @@ def delete_receiver_tip(store, user_id, tip_id):
     comment.author_nonce = security.get_b64_encoded_nonce()
     comment.author =security.encrypt_with_ServerKey(comment.author_nonce,"System")
     comment.type_nonce = security.get_b64_encoded_nonce()
-    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[2])) # system
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, Comment._types[2]) # system
     comment.mark = u'not notified' # Comment._marker[0]
 
     rtip.internaltip.comments.add(comment)
@@ -234,7 +234,7 @@ def postpone_expiration_date(store, user_id, tip_id):
 
     comment = Comment()
     comment.creation_date_nonce = security.get_b64_encoded_nonce()
-    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    comment.creation_date = security.encrypt_binary_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
     
     comment.system_content = dict({
            'type': "1", # the first kind of structured system_comments
@@ -244,10 +244,10 @@ def postpone_expiration_date(store, user_id, tip_id):
         # remind: this is put just for debug, it's never used in the flow
     # and a system comment may have nothing to say except the struct
     comment.content_nonce = security.get_b64_encoded_nonce()
-    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str("%s %s %s (UTC)" % (
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, "%s %s %s (UTC)" % (
                    rtip.receiver.name,
                    datetime_to_pretty_str(datetime_now()),
-                   datetime_to_pretty_str(rtip.internaltip.expiration_date))))
+                   datetime_to_pretty_str(rtip.internaltip.expiration_date)))
 
     comment.internaltip_id = rtip.internaltip.id
     
@@ -255,7 +255,7 @@ def postpone_expiration_date(store, user_id, tip_id):
     comment.author =security.encrypt_with_ServerKey(comment.author_nonce,"System")
     
     comment.type_nonce = security.get_b64_encoded_nonce()
-    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[2])) # system
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, Comment._types[2]) # system
     
     comment.mark = Comment._marker[4] # skipped
 
@@ -274,10 +274,10 @@ def addReceivertoTip(store, tip_id, receiverID):
         # Create a new newReceiverTip
         newReceiverTip = ReceiverTip()
         newReceiverTip.creation_date_nonce = security.get_b64_encoded_nonce()
-        newReceiverTip.creation_date = security.encrypt_with_ServerKey(newReceiverTip.creation_date_nonce,dumps(datetime_now()))
+        newReceiverTip.creation_date = security.encrypt_binary_with_ServerKey(newReceiverTip.creation_date_nonce,dumps(datetime_now()))
         
         newReceiverTip.last_access_nonce = security.get_b64_encoded_nonce()
-        newReceiverTip.last_access = security.encrypt_with_ServerKey(newReceiverTip.last_access_nonce,dumps(datetime_now()))
+        newReceiverTip.last_access = security.encrypt_binary_with_ServerKey(newReceiverTip.last_access_nonce,dumps(datetime_now()))
         # Set it to the user
         newReceiverTip.receiver_id = receiverID
         # Find internalTipId from over given ReceiverTip ID
@@ -443,7 +443,7 @@ def receiver_serialize_comment(comment):
         'content' : security.decrypt_with_ServerKey(comment.content_nonce,comment.content),
         'system_content' : comment.system_content if comment.system_content else {},
         'author' : security.decrypt_with_ServerKey(comment.author_nonce,comment.author),
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(comment.creation_date_nonce, comment.creation_date))),
     }
     return comment_desc
 
@@ -464,16 +464,16 @@ def create_comment_receiver(store, user_id, tip_id, request):
 
     comment = Comment()
     comment.creation_date_nonce = security.get_b64_encoded_nonce()
-    comment.creation_date = security.encrypt_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
+    comment.creation_date = security.encrypt_binary_with_ServerKey(comment.creation_date_nonce,dumps(datetime_now()))
     
     comment.content_nonce = security.get_b64_encoded_nonce()
-    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, str(request['content']))
+    comment.content = security.encrypt_with_ServerKey(comment.content_nonce, request['content'])
     
     comment.internaltip_id = rtip.internaltip.id
     comment.author_nonce = security.get_b64_encoded_nonce()
-    comment.author =security.encrypt_with_ServerKey(comment.author_nonce,str(rtip.receiver.name))
+    comment.author =security.encrypt_with_ServerKey(comment.author_nonce,rtip.receiver.name)
     comment.type_nonce = security.get_b64_encoded_nonce()
-    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, str(Comment._types[0])) # Receiver
+    comment.type = security.encrypt_with_ServerKey(comment.type_nonce, Comment._types[0]) # Receiver
     comment.mark = Comment._marker[0] # Not notified
 
     rtip.internaltip.comments.add(comment)
@@ -575,7 +575,7 @@ def receiver_serialize_message(msg):
 
     return {
         'id' : msg.id,
-        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
+        'creation_date' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(msg.creation_date_nonce, msg.creation_date))),
         'content' : security.decrypt_with_ServerKey(msg.content_nonce,msg.content),
         'visualized' : msg.visualized,
         'type' : security.decrypt_with_ServerKey(msg.type_nonce,msg.type),
@@ -611,10 +611,10 @@ def create_message_receiver(store, user_id, tip_id, request):
     msg.receivertip_id = rtip.id
     
     msg.content_nonce = security.get_b64_encoded_nonce()
-    msg.content = security.encrypt_with_ServerKey(msg.content_nonce, str(request['content']))
+    msg.content = security.encrypt_with_ServerKey(msg.content_nonce, request['content'])
  
     msg.author_nonce = security.get_b64_encoded_nonce()
-    msg.author = security.encrypt_with_ServerKey(msg.author_nonce, str(rtip.receiver.name))
+    msg.author = security.encrypt_with_ServerKey(msg.author_nonce, rtip.receiver.name)
 
     msg.type_nonce = security.get_b64_encoded_nonce()
     # remind: is safest use this convention, and probably we've to
@@ -622,7 +622,7 @@ def create_message_receiver(store, user_id, tip_id, request):
     msg.type = security.encrypt_with_ServerKey(msg.type_nonce, "receiver")
     
     msg.creation_date_nonce = security.get_b64_encoded_nonce()
-    msg.creation_date = security.encrypt_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
+    msg.creation_date = security.encrypt_binary_with_ServerKey(msg.creation_date_nonce,dumps(datetime_now()))
     
     msg.mark = u'skipped'
 
