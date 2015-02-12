@@ -1,11 +1,11 @@
-<footer class="footer" id="FooterBox">
+<footer class="footer" id="FooterBox" data-ng-controller="FooterCtrl">
     <div class="preformatted"> {{ node.footer }}</div>
        <div class="preformatted" > Based on <a href=" https://globaleaks.org/">GlobaLeaks</a>, copyright by Hermes Center for Transparency and Digital Human Rights</div>
           <br/>
-       <div class="pull-right"> <a href="" onclick=""> Contact </a>
-                      &nbsp;<a href="" onclick=""> Data Protection Notice</a>
-                      &nbsp;<a href="" onclick=""> Legal Notice</a>
-                      &nbsp;<a href="" onclick=""> Imprint </a> &nbsp; &nbsp;
+       <div class="pull-right"> <a href="" onclick="showContacts()"> Contact </a>
+                      &nbsp;<a href="" onclick="showDataProtectionNotice()"> Data Protection Notice</a>
+                      &nbsp;<a href="" onclick="showLegalNotice()"> Legal Notice</a>
+                      &nbsp;<a href="" onclick="showImprint()"> Imprint </a> &nbsp; &nbsp;
        
        </div>
 </footer>

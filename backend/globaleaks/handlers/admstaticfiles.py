@@ -170,6 +170,26 @@ class StaticFileInstance(BaseStaticFileHandler):
                 path = os.path.join(GLSetting.static_path, uploaded_file['filename'])
                 log.debug("Received request to save %s in path %s" %
                           (uploaded_file['filename'], path))
+                
+        elif filename == 'footer_contacts':
+                path = os.path.join(GLSetting.static_path, "footer_contacts.html")
+                log.debug("Received request to save %s in path %s" %
+                          (uploaded_file['filename'], path))
+                
+        elif filename == 'footer_imprint':
+                path = os.path.join(GLSetting.static_path, "footer_imprint.html")
+                log.debug("Received request to save %s in path %s" %
+                          (uploaded_file['filename'], path))
+                
+        elif filename == 'footer_dataProtectionNotice':
+                path = os.path.join(GLSetting.static_path, "footer_dataProtectionNotice.html")
+                log.debug("Received request to save %s in path %s" %
+                          (uploaded_file['filename'], path))
+                
+        elif filename == 'footer_legalNotice':
+                path = os.path.join(GLSetting.static_path, "footer_legalNotice.html")
+                log.debug("Received request to save %s in path %s" %
+                          (uploaded_file['filename'], path))
         else:
             try:
                 path = yield receiver_pic_path(filename)

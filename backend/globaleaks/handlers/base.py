@@ -619,8 +619,7 @@ class BaseHandler(RequestHandler):
 
     def get_uploaded_file(self):
         uploaded_file = self.request.body
-
-        if not isinstance(uploaded_file, dict) or len(uploaded_file.keys()) != 5:
+        if not isinstance(uploaded_file, dict) or (GLSetting.symm_crypt_key_initialized and len(uploaded_file.keys()) != 6) or ( not GLSetting.symm_crypt_key_initialized and len(uploaded_file.keys()) != 5):
             raise errors.InvalidInputFormat("Expected a dict of five keys in uploaded file")
 
         for filekey in uploaded_file.keys():
@@ -628,7 +627,8 @@ class BaseHandler(RequestHandler):
                                u'body_len',
                                u'content_type',
                                u'filename',
-                               u'body_filepath']:
+                               u'body_filepath',
+                               u'nonce',]:
                 raise errors.InvalidInputFormat(
                     "Invalid JSON key in uploaded file (%s)" % filekey)
 
