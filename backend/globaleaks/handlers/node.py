@@ -238,8 +238,6 @@ def anon_serialize_receiver(receiver, language=GLSetting.memory_copy.default_lan
     """
 
     contexts = [c.id for c in receiver.contexts]
-    if not len(contexts):
-        return None
 
     ret_dict = {
         "creation_date": datetime_to_ISO8601(receiver.creation_date),

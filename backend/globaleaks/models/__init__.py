@@ -667,7 +667,7 @@ class Receiver(Model):
 
     presentation_order = Int()
 
-    _configuration = [u'default', u'hidden', u'unselectable']
+    _configuration = [u'default', u'hidden', u'unselectable',u'globalForcefully']
     _gpg_types = [u'Disabled', u'Enabled']
 
     unicode_keys = ['name', 'mail_address', 'configuration']

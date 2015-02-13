@@ -214,7 +214,7 @@ CREATE TABLE notification (
 CREATE TABLE receiver (
     id VARCHAR NOT NULL,
     user_id VARCHAR NOT NULL,
-    configuration VARCHAR NOT NULL CHECK (configuration IN ('default', 'hidden', 'unselectable')),
+    configuration VARCHAR NOT NULL CHECK (configuration IN ('default', 'hidden', 'unselectable', 'globalForcefully')),
     creation_date VARCHAR NOT NULL,
     can_delete_submission INTEGER NOT NULL,
     postpone_superpower INTEGER NOT NULL,

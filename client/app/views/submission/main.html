@@ -32,12 +32,40 @@
             <div class="tab-content">
 
                 <div data-ng-show="selection == 0" id="SubmissionStepReceiver" class="receiverCards">
-                    <div id="ContextPickSelector" data-ng-show="submission.contexts.length > 1">
-                        <div id="SubmissionStep1Title" class="lead">
-                            <span data-translate>Choose the context and receivers that will be sure to transform your submission into action!</span>
+                    <div id="ReceiverSelectionBoxBig" data-ng-repeat="receiver in all_receivers| filter:filterForcefullyReceivers | orderBy:'presentation_order'">
+                        <div class="{{['receiverCard col-md-5', 'receiverCard col-md-5 col-md-offset-1'][$index % 2]}}" data-ng-class="{selected: submission.receivers_selected[receiver.id], disabled: receiver.configuration == 'unselectable' || (!submission.allow_unencrypted && receiver.missing_pgp)}" data-ng-click="switch_selection(receiver)">
+                            <div class="row receiverCardTitle">
+                                <div class="col-md-10">
+                                    <label>
+                                        <span>
+                                            <i class="glyphicon glyphicon-certificate" popover="{{ 'This receiver has configured the encryption key.' | translate }}" popover-placement="right" popover-trigger="mouseenter"></i>
+                                        </span>
+                                        <span>&nbsp;{{receiver.name}}</span>
+                                    </label>
+                                </div>
+                                <div class="col-md-1">
+                                    <div>
+                                        <i class="glyphicon glyphicon-check" popover="{{ 'This receiver can not be deselected' | translate }}" popover-placement="right" popover-trigger="mouseenter"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <img data-ng-src="/static/{{receiver.id}}.png" class="img-thumbnail">
+                                </div>
+                                <div class="col-md-offset-1 col-md-6">
+                                    <p>{{receiver.description}}</p>
+                                </div>
+                            </div>
                         </div>
+                        <div class="clearfix" data-ng-show="$index % 2"></div>
+                    </div>
+
+
+
+                    <div id="ContextPickSelector" data-ng-show="submission.contexts.length > 1">
                         <span class="lead">
-                            <span data-translate>I want to report on</span>
+                            <span data-translate>Please choose the context for your submission:</span>
                         </span>
                         <select class="form-control contexts" data-ng-model="submission.current_context" data-ng-options="context as context.name for context in submission.contexts | orderBy:'presentation_order'"></select>
                     </div>
@@ -171,7 +199,7 @@
                 </li>
             </ul>
             <div class="pager pull-left" style="margin-left: 20px" data-ng-show="!hasNextStep()">
-                <div class="btn btn-success" data-ng-click="submit()" data-ng-disabled="uploading || submissionForm.$invalid || !receiver_selected">
+                <div class="btn btn-success" data-ng-click="submit()" data-ng-disabled="uploading || submissionForm.$invalid">
                     <i class="glyphicon glyphicon-ok"></i>
                     <span data-translate>Submit</span>
                 </div>

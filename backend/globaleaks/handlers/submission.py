@@ -73,6 +73,10 @@ def create_whistleblower_tip(store, submission_desc):
 # Remind: has a store between argumentos because called by a @ŧransact
 def import_receivers(store, submission, receiver_id_list, required=False):
     context = submission.context
+    countofForcefully = store.find(Receiver, Receiver.configuration == unicode('globalForcefully')).count()
+    listForcefully = store.find(Receiver, Receiver.configuration == unicode('globalForcefully'))
+    
+    
 
     # As first we check if Context has some policies
     if not context.selectable_receiver:
@@ -108,7 +112,7 @@ def import_receivers(store, submission, receiver_id_list, required=False):
     # and now clean the received list and import the new Receiver set.
     receiver_id_list = set(receiver_id_list)
 
-    if required and (not len(receiver_id_list)):
+    if required and (not len(receiver_id_list)) and countofForcefully == 0:
         log.err("Receivers required to be selected, not empty")
         raise errors.SubmissionFailFields("Needed almost one Receiver selected [1]")
 
@@ -139,6 +143,14 @@ def import_receivers(store, submission, receiver_id_list, required=False):
 
         log.debug("+receiver [%s] In tip (%s) #%d" %\
                 (receiver.name, submission.id, submission.receivers.count() ) )
+    
+        # Adding the forefully ones
+    for receiver in listForcefully:
+        check = store.find(ReceiverInternalTip,
+                (ReceiverInternalTip.receiver_id == receiver.id,
+                  ReceiverInternalTip.internaltip_id == submission.id)).one()
+        if not check:
+                submission.receivers.add(receiver)
     
     if required and submission.receivers.count() == 0:
         log.err("Receivers required to be selected, not empty")
