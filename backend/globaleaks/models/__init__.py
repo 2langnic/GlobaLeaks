@@ -302,8 +302,6 @@ class ReceiverTip(Model):
 
     _marker = [u'not notified', u'notified', u'unable to notify', u'disabled',
                u'skipped']
-    # Boolean which indicates if a password for this particular tip and receiver combination has been set
-    password_set = Bool(default = False )
     # N.B. *_keys = It's created without initializing dict
 
 

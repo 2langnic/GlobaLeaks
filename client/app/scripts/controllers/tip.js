@@ -21,18 +21,6 @@ GLClient.controller('TipCtrl', ['$scope', '$http', '$route', '$location', '$moda
             });
         };
 
-        $scope.tip_access = function (id) {
-            var modalInstance = $modal.open({
-                templateUrl: 'views/partials/receiver_tip_password.html',
-                controller: ReceiverTipPasswordControl,
-                resolve: {
-                    tip_id: function () {
-                        return id;
-                    }
-                }
-            });
-        };
-
         $scope.tip_extend = function (id) {
             $scope.tip_id = id;
 
@@ -98,40 +86,6 @@ ModalDeleteTipCtrl = ['$scope', '$http', '$route', '$location', '$modalInstance'
                         $location.url('/receiver/tips');
                         $route.reload();
                     });
-        };
-    }];
-
-ReceiverTipPasswordControl = ['$scope', '$http', '$route', '$location', '$modalInstance', 'ReceiverSubmissionAuthentication', 'tip_id', 'doublepasswordWatcher',
-    function ($scope, $http, $route, $location, $modalInstance, ReceiverSubmissionAuthentication, tip_id, doublepasswordWatcher) {
-
-        doublepasswordWatcher($scope, "receiver_submission_key_new",
-                "receiver_submission_key_check");
-        $scope.tip_id = tip_id;
-
-        $scope.ReceiverSubmissionAuthentication = ReceiverSubmissionAuthentication.get({tip_id: tip_id});
-        //now the variable set_password is under $scope.ReceiverSubmissionAuthentication.password_set available
-        //regarding defintion Tip_Authentication in rtip.py at the method get which returns password_set
-
-        $scope.cancel = function () {
-            $modalInstance.close();
-        };
-
-        $scope.ok = function (password) {
-            if ($scope.ReceiverSubmissionAuthentication.password_set) {
-                //encrypt all data with password and relocate to the location because a password was already set;
-                $location.path("/status/" + tip_id);
-            }
-            else {
-                $scope.ReceiverSubmissionAuthentication.password = password;
-                $scope.ReceiverSubmissionAuthentication.$update({tip_id: tip_id})
-                $location.path("/status/" + tip_id);
-                // use the password to call the $update on  to call the put and wait
-                //ReceiverSubmissionAuthentication.password = password
-                //ReceiverSubmissionAuthentication.$update()
-            }
-            $modalInstance.close();
-            //check the password
-            // $location.path("/status/"+tip_id);
         };
     }];
 

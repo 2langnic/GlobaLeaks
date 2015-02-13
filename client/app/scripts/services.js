@@ -533,9 +533,6 @@ angular.module('resourceServices', ['ngResource', 'resourceServices.authenticati
   factory('Receivers', ['$resource', function($resource) {
     return $resource('/receivers');
 }]).
-  factory('ReceiverSubmissionAuthentication', ['$resource', function($resource) {
-    return $resource('/rtip/:tip_id/authentication', {tip_id: '@tip_id'}, {update: {method: 'PUT'}});
-}]).
   factory('ReceiverPreferences', ['$resource', function($resource) {
     return $resource('/receiver/preferences', {}, {'update': {method: 'PUT'}});
 }]).

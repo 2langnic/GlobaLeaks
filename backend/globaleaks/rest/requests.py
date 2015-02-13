@@ -47,10 +47,6 @@ authDict = {
     'role' : unicode
 }
 
-subKeyDict = {
-    'password' : unicode,
-}
-
 symmEncryptKeyDict = {
     'key' : unicode,
 }
