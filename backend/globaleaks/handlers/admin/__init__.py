@@ -1137,7 +1137,7 @@ class SymmKey(BaseHandler):
         request = self.validate_message(self.request.body, requests.symmEncryptKeyChangeDict)
         if request['check']:
             try:
-                key_check_successful =  security.test_symmetric_encryption_testFile(request['key'])
+                key_check_successful =  yield security.test_symmetric_encryption_testFile(request['key'])
             except Exception as e:
                 log.debug("Error in test_symmetric_encryption_testFile:" + str(e))
              
