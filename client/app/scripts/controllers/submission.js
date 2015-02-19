@@ -164,12 +164,12 @@ GLClient.controller('SubmissionCtrl',
                     $scope.selection = index;
                 };
                 $scope.hasNextStep = function () {
-                    if ($scope.current_context == undefined)
+                    if ($scope.submission.current_context == undefined)
                         return false;
-                    return $scope.selection < $scope.current_context.steps.length;
+                    return $scope.selection < $scope.submission.current_context.steps.length;
                 };
                 $scope.hasPreviousStep = function () {
-                    if ($scope.current_context == undefined)
+                    if ($scope.submission.current_context == undefined)
                         return false;
                     return $scope.selection > 0;
                 };
