@@ -421,7 +421,7 @@ def create_receiver_files_and_reference_to_receiverTip(store):
             continue
         
         for receiver in filex.internaltip.receivers:
-            create_receiver_file(receiver.id,filex.id)
+            yield create_receiver_file(receiver.id,filex.id)
             filex.mark = u'ready'
             
      
@@ -446,7 +446,7 @@ class DeliverySchedule(GLJob):
             sys.excepthook(*sys.exc_info())
         
         # Creation of the receiverfiles and referencing them to the receivertip
-        create_receiver_files_and_reference_to_receiverTip()
+        yield create_receiver_files_and_reference_to_receiverTip()
         
         
         """

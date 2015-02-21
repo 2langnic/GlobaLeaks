@@ -45,8 +45,10 @@ class TestCleaning(helpers.TestGL):
         self.tipContext = copy.deepcopy(TTip.tipContext)
         self.tipReceiver1 = copy.deepcopy(TTip.tipReceiver1)
         self.tipReceiver1['postpone_superpower'] = True
+        self.tipReceiver1['can_modify_tip_receivers'] = True
         self.tipReceiver2 = copy.deepcopy(TTip.tipReceiver2)
         self.tipReceiver2['postpone_superpower'] = True
+        self.tipReceiver2['can_modify_tip_receivers'] = True
         self.tipOptions = TTip.tipOptions
         self.commentCreation = TTip.commentCreation
 

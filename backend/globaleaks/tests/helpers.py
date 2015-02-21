@@ -155,6 +155,8 @@ class TestGL(unittest.TestCase):
         self.dummyReceiverUser_2 = self.get_dummy_receiver_user('receiver2')
         self.dummyReceiver_1 = self.get_dummy_receiver('receiver1') # the one without PGP
         self.dummyReceiver_2 = self.get_dummy_receiver('receiver2') # the one with PGP
+        self.dummyReceiver_2['can_modify_tip_receivers'] = False
+        self.dummyReceiver_1['can_modify_tip_receivers'] = False
 
         if self.encryption_scenario == 'MIXED':
             self.dummyReceiver_1['gpg_key_armor'] = None
@@ -209,6 +211,7 @@ class TestGL(unittest.TestCase):
         dummySubmissionDict['receivers'] = []
         dummySubmissionDict['files'] = []
         dummySubmissionDict['finalize'] = True
+        dummySubmissionDict['nonce'] = security.get_b64_encoded_nonce()
 
         defer.returnValue(dummySubmissionDict)
 
@@ -234,6 +237,7 @@ class TestGL(unittest.TestCase):
             'body_filepath': temporary_file.filepath,
             'filename': filename,
             'content_type': content_type,
+            'nonce': security.get_b64_encoded_nonce()
         }
 
         return dummy_file
@@ -744,6 +748,7 @@ class MockDict():
             'finalize': False,
             'receivers': [],
             'files': [],
+            'nonce': security.get_b64_encoded_nonce(),
         }
 
         self.dummyNode = {
@@ -784,6 +789,9 @@ class MockDict():
             'configured': False,
             'wizard_done': False,
             'custom_homepage': False,
+            'symm_crypt_activated': False,
+            'symm_crypt_key_initialized': False,
+            'wb_hide_stats' :False,
             'disable_privacy_badge': False,
             'disable_security_awareness_badge': False,
             'disable_security_awareness_questions': False,
@@ -795,6 +803,7 @@ class MockDict():
             'custom_privacy_badge_tbb': u'',
             'custom_privacy_badge_tor': u'',
             'custom_privacy_badge_none': u'',
+            'symm_key': u'',
         }
 
         self.generic_template_keywords = [ '%NodeName%', '%HiddenService%',
