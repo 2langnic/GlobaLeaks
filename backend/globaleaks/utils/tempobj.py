@@ -2,6 +2,7 @@
 
 from twisted.internet import reactor
 from twisted.python import components
+from globaleaks.settings import GLSetting
 
 class TempObj(components.Componentized):
     """
@@ -34,7 +35,10 @@ class TempObj(components.Componentized):
         self.timeout = timeout
 
         self.expireCallbacks = []
-
+        # Creation of an absolute Timeout which kills the above created session.
+        # An absolute Timeout is an timeout which is not stopped by interaction. 
+        self._reactor.callLater(GLSetting.defaults.lifetimes['absolute'], self.expire)
+        
         self._expireCall = self._reactor.callLater(
             self.timeout, self.expire)
 

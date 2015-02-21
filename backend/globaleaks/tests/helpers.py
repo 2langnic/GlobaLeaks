@@ -237,7 +237,6 @@ class TestGL(unittest.TestCase):
             'body_filepath': temporary_file.filepath,
             'filename': filename,
             'content_type': content_type,
-            'nonce': security.get_b64_encoded_nonce()
         }
 
         return dummy_file

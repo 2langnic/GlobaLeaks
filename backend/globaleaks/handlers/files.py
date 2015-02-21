@@ -95,7 +95,8 @@ def register_file_db(store, uploaded_file, filepath, internaltip_id):
     new_file.file_path = filepath
     #Once again is has to be saved as base64 due to error
     #Unable to register file in DB: 'ascii' codec can't decode byte 0xb0 in position 0: ordinal not in range(128)
-    new_file.file_encryption_nonce = b64encode(uploaded_file['nonce'])
+    if GLSetting.symm_crypt_key_initialized:
+        new_file.file_encryption_nonce = b64encode(uploaded_file['nonce'])
 
     store.add(new_file)
 
