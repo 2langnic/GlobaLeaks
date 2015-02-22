@@ -224,13 +224,12 @@ def postpone_expiration_date(store, user_id, tip_id):
             "True" if rtip.receiver.postpone_superpower else "False"
         ))
 
-    rtip.internaltip.expiration_date = \
-        utc_future_date(seconds=rtip.internaltip.context.tip_timetolive)
+    rtip.internaltip.expiration_date = security.encrypt_binary_with_ServerKey(rtip.internaltip.expiration_date_nonce,dumps(utc_future_date(seconds=rtip.internaltip.context.tip_timetolive)))
 
     log.debug(" [%s] in %s has extended expiration time to %s" % (
         rtip.receiver.name,
         datetime_to_pretty_str(datetime_now()),
-        datetime_to_pretty_str(rtip.internaltip.expiration_date)))
+        datetime_to_pretty_str(loads(security.decrypt_binary_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date)))))
 
     comment = Comment()
     comment.creation_date_nonce = security.get_b64_encoded_nonce()
@@ -239,15 +238,15 @@ def postpone_expiration_date(store, user_id, tip_id):
     comment.system_content = dict({
            'type': "1", # the first kind of structured system_comments
            'receiver_name': rtip.receiver.name,
-           'expire_on' : datetime_to_ISO8601(rtip.internaltip.expiration_date)
+           'expire_on' : datetime_to_ISO8601(loads(security.decrypt_binary_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date)))
     })
-        # remind: this is put just for debug, it's never used in the flow
+    # remind: this is put just for debug, it's never used in the flow
     # and a system comment may have nothing to say except the struct
     comment.content_nonce = security.get_b64_encoded_nonce()
     comment.content = security.encrypt_with_ServerKey(comment.content_nonce, "%s %s %s (UTC)" % (
                    rtip.receiver.name,
                    datetime_to_pretty_str(datetime_now()),
-                   datetime_to_pretty_str(rtip.internaltip.expiration_date)))
+                   datetime_to_pretty_str(loads(security.decrypt_binary_with_ServerKey(rtip.internaltip.expiration_date_nonce,rtip.internaltip.expiration_date)))))
 
     comment.internaltip_id = rtip.internaltip.id
     

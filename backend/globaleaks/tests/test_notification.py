@@ -2,6 +2,8 @@ from twisted.internet.defer import inlineCallbacks
 
 # override GLsetting
 from globaleaks.settings import GLSetting
+from globaleaks import security
+from pickle import dumps
 
 GLSetting.notification_plugins = ['MailNotification']
 GLSetting.memory_copy.notif_source_name = "name fake"
@@ -19,14 +21,21 @@ class TestEmail(helpers.TestGLWithPopulatedDB):
         yield helpers.TestGLWithPopulatedDB.setUp(self)
 
         wb_steps = yield helpers.fill_random_fields(self.dummyContext['id'])
-
         self.recipe = yield submission.create_submission({
             'wb_steps': wb_steps,
             'context_id': self.dummyContext['id'],
             'receivers': [self.dummyReceiver_1['id']],
             'files': [],
+            'finalize': False,
+            }, finalize=False)
+        
+        submission.update_submission(self.recipe['id'], {
+            'wb_steps': wb_steps,
+            'context_id': self.dummyContext['id'],
+            'receivers': [self.dummyReceiver_1['id']],
+            'files': [],
             'finalize': True,
-            }, finalize=True)
+            }, finalize = True)
 
         yield delivery_sched.tip_creation()
 

@@ -8,7 +8,7 @@ from twisted.internet.defer import inlineCallbacks
 
 from globaleaks.tests import helpers
 
-from globaleaks import models
+from globaleaks import models, security
 from globaleaks.rest import requests
 from globaleaks.handlers import base, admin, submission, files, rtip, receiver
 from globaleaks.jobs import delivery_sched, cleaning_sched
@@ -17,6 +17,7 @@ from globaleaks.settings import transact, GLSetting
 from globaleaks.tests.test_tip import TTip
 
 from globaleaks.security import GLSecureTemporaryFile
+from pickle import loads, dumps
 
 STATIC_PASSWORD = u'bungabunga ;('
 dummy_sum = u'a1c2257ef58acffec9b0e2d165dc6be67c8d05f224116714e18bec972aea34c3'
@@ -71,21 +72,21 @@ class TestCleaning(helpers.TestGL):
     def check_tip_not_expired(self, store):
         tips = store.find(models.InternalTip)
         for tip in tips:
-            self.assertFalse(is_expired(tip.expiration_date))
+            self.assertFalse(is_expired(loads(security.decrypt_binary_with_ServerKey(tip.expiration_date_nonce,tip.expiration_date))))
 
     @transact
     def force_submission_expire(self, store):
         tips = store.find(models.InternalTip)
         for tip in tips:
-            tip.creation_date = datetime_null()
-            self.assertTrue(is_expired(tip.creation_date))
+            tip.creation_date = security.encrypt_binary_with_ServerKey(tip.creation_date_nonce,dumps(datetime_null()))
+            self.assertTrue(is_expired(loads(security.decrypt_binary_with_ServerKey(tip.creation_date_nonce,tip.creation_date))))
 
     @transact
     def force_tip_expire(self, store):
         tips = store.find(models.InternalTip)
         for tip in tips:
-            tip.expiration_date = datetime_null()
-            self.assertTrue(is_expired(tip.expiration_date))
+            tip.expiration_date = security.encrypt_binary_with_ServerKey(tip.expiration_date_nonce,dumps(datetime_null()))
+            self.assertTrue(is_expired(loads(security.decrypt_binary_with_ServerKey(tip.expiration_date_nonce,tip.expiration_date))))
 
     @inlineCallbacks
     def do_setup_tip_environment(self):

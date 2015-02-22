@@ -189,6 +189,7 @@ class TestGL(unittest.TestCase):
 
     def get_dummy_receiver(self, descpattern):
         new_r = dict(MockDict().dummyReceiver)
+        new_r['can_modify_tip_receivers'] = False
         new_r['name'] = new_r['username'] =\
         new_r['mail_address'] = unicode('%s@%s.xxx' % (descpattern, descpattern))
         new_r['password'] = VALID_PASSWORD1
@@ -585,6 +586,7 @@ class MockDict():
         self.dummyReceiver = {
             'password': VALID_PASSWORD1,
             'password_change_needed': False,
+            'can_modify_tip_receivers' : False,
             'name': u'Ned Stark',
             'description': u'King MockDummy Receiver',
             # Email can be different from the user, but at the creation time is used
