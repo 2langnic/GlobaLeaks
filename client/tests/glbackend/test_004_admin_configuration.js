@@ -48,6 +48,7 @@ var receiver = {
   name: "receiver1@antani.gov", // used 'receiverN@antani.gov' for population
   password: "receiver1@antani.gov", // used 'receiverN@antani.gov' for population
   postpone_superpower: true,
+  can_modify_tip_receivers :false,
   presentation_order: 0,
   tip_notification: false,
   configuration: "default",
