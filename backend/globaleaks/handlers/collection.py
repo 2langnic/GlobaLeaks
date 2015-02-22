@@ -23,6 +23,7 @@ from globaleaks.jobs.notification_sched import serialize_receivertip
 from globaleaks.models import ReceiverTip, ReceiverFile
 from globaleaks.utils.utility import log
 from globaleaks.utils.templating import Templating
+from globaleaks import security
 
 def get_compression_opts(compression):
     if compression == 'zipstored':
@@ -87,7 +88,7 @@ def get_collection_info(store, rtip_id):
     rfiles = store.find(ReceiverFile, ReceiverFile.receiver_tip_id == rtip_id)
     for rf in rfiles:
         collection_dict['files_number'] += 1
-        collection_dict['total_size'] += rf.size
+        collection_dict['total_size'] += int(security.decrypt_with_ServerKey(rf.internalfile.size_nonce, rf.internalfile.size))
         collection_dict['files'].append(serialize_receiver_file(rf))
 
     return collection_dict

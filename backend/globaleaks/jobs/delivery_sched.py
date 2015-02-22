@@ -16,12 +16,11 @@ from twisted.internet.defer import inlineCallbacks
 
 from globaleaks.jobs.base import GLJob
 from globaleaks.models import InternalFile, InternalTip, ReceiverTip, \
-                              ReceiverFile, Receiver
+                              ReceiverFile
 from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.utils.utility import log , datetime_now
 from globaleaks.security import GLBGPG, GLSecureFile
 from globaleaks.handlers.admin import admin_serialize_receiver
-from globaleaks.third_party.rstr import xeger
 from globaleaks import security
 from pickle import dumps
 
@@ -378,7 +377,6 @@ def encrypt_where_available(receivermap):
     return retcode
 
 
-@transact
 def create_receiver_file(store,receiver_id,InternalFile_id):
     
     receiverfile = ReceiverFile()
@@ -404,7 +402,6 @@ def create_receiver_file(store,receiver_id,InternalFile_id):
     receiverfile.status = unicode(u'encrypted')
 
     receiverfile.mark = u'not notified'
-
     store.add(receiverfile)
 
 @transact
@@ -421,7 +418,7 @@ def create_receiver_files_and_reference_to_receiverTip(store):
             continue
         
         for receiver in filex.internaltip.receivers:
-            yield create_receiver_file(receiver.id,filex.id)
+            create_receiver_file(store, receiver.id,filex.id)
             filex.mark = u'ready'
             
      

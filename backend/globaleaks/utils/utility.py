@@ -462,8 +462,7 @@ def dump_file_list(filelist, files_n):
                              "Size (Bytes)")
 
     for i in xrange(files_n):
-        info += "%s%s%i\n" % (filelist[i]['name'],
-                                " "*(40 - len(filelist[i]['name'])),
-                                filelist[i]['size'])
+        info += "%s%s\n" % (filelist[i]['name'],
+                                " "*(40 - len(filelist[i]['name'])))
 
     return info
