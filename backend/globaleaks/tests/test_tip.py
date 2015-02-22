@@ -9,7 +9,9 @@ from globaleaks.tests import helpers
 from globaleaks.rest import errors, requests
 from globaleaks.handlers import base, admin, submission, authentication, receiver, rtip, wbtip
 from globaleaks.jobs import delivery_sched
-from globaleaks import models
+from globaleaks import models, security
+from pickle import loads
+from globaleaks.tests.handlers.test_submission import getNonceForSubmission
 STATIC_PASSWORD = u'bungabunga ;( 12345'
 
 class MockHandler(base.BaseHandler):
@@ -90,7 +92,8 @@ class TTip(helpers.TestGL):
         'timezone': 0,
         'language': u'en',
         'password_change_needed': True,
-        'configuration': 'default'
+        'configuration': 'default',
+        'can_modify_tip_receivers' :False,
     }
 
     tipReceiver2 = {
@@ -114,7 +117,8 @@ class TTip(helpers.TestGL):
         'timezone': 0,
         'language': u'en',
         'password_change_needed': True,
-        'configuration': 'default'
+        'configuration': 'default',
+        'can_modify_tip_receivers' :False,
     }
 
     tipOptions = {
@@ -169,9 +173,10 @@ class TestTipInstance(TTip):
         dummySubmissionDict = yield self.get_dummy_submission(self.context_desc['id'])
         basehandler.validate_jmessage(dummySubmissionDict, requests.wbSubmissionDesc)
 
-        self.submission_desc = yield submission.create_submission(dummySubmissionDict, finalize=True)
-
-        self.assertEqual(self.submission_desc['wb_steps'], dummySubmissionDict['wb_steps'])
+        self.submission_desc = yield submission.create_submission(dummySubmissionDict, finalize=False)
+        self.submission_desc = yield submission.update_submission(self.submission_desc['id'],dummySubmissionDict, finalize = True)
+        nonce = yield getNonceForSubmission(self.submission_desc['id'])
+        self.assertEqual(loads(security.decrypt_binary_with_ServerKey(nonce,self.submission_desc['wb_steps'])), dummySubmissionDict['wb_steps'])
         self.assertEqual(self.submission_desc['mark'], models.InternalTip._marker[1])
         # Ok, now the submission has been finalized, the tests can start.
 
@@ -211,8 +216,8 @@ class TestTipInstance(TTip):
             self.wb_auth_with_receipt()
 
         self.wb_data = yield wbtip.get_internaltip_wb(self.wb_tip_id)
-
-        self.assertEqual(self.wb_data['wb_steps'], self.submission_desc['wb_steps'])
+        nonce = yield getNonceForSubmission(self.submission_desc['id'])
+        self.assertEqual(loads(security.decrypt_binary_with_ServerKey(nonce,self.submission_desc['wb_steps'])), self.wb_data['wb_steps'])
 
     @inlineCallbacks
     def create_receivers_tip(self):
@@ -247,11 +252,15 @@ class TestTipInstance(TTip):
 
             self.receiver1_data = yield rtip.get_internaltip_receiver(auth1, tmp2)
 
-            self.assertEqual(self.receiver1_data['wb_steps'], self.submission_desc['wb_steps'])
+            nonce = yield getNonceForSubmission(self.submission_desc['id'])
+            self.assertEqual(loads(security.decrypt_binary_with_ServerKey(nonce,self.submission_desc['wb_steps'])), self.receiver1_data['wb_steps'])
+
             self.assertEqual(self.receiver1_data['access_counter'], 0)
 
         self.receiver2_data = yield rtip.get_internaltip_receiver(auth2, self.rtip2_id)
-        self.assertEqual(self.receiver2_data['wb_steps'], self.submission_desc['wb_steps'])
+        
+        nonce = yield getNonceForSubmission(self.submission_desc['id'])
+        self.assertEqual(loads(security.decrypt_binary_with_ServerKey(nonce,self.submission_desc['wb_steps'])), self.receiver2_data['wb_steps'])
         self.assertEqual(self.receiver2_data['access_counter'], 0)
 
     @inlineCallbacks
@@ -290,7 +299,8 @@ class TestTipInstance(TTip):
         # this test has been added to test issue/515
         self.assertTrue(isinstance(tiplist, list))
         self.assertTrue(isinstance(tiplist[0], dict))
-        self.assertTrue(isinstance(tiplist[0]['preview'], list))
+        # preview outcommented in receiver.py
+        #self.assertTrue(isinstance(tiplist[0]['preview'], list))
         # then the content here depends on the fields
 
     @inlineCallbacks

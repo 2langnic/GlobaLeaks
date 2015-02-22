@@ -172,20 +172,19 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
         rfiles_n = store.find(ReceiverFile,
             (ReceiverFile.internaltip_id == rtip.internaltip.id,
              ReceiverFile.receiver_id == receiver_id)).count()
+             
+        your_messages = store.find(Message, Message.receivertip_id == rtip.id)
+        countyourmessages = 0
+        countunreadmessages= 0
+        countreadmessages = 0
+        for yourmessage in your_messages:
+            if (u'receiver' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type)):
+                countyourmessages = countyourmessages + 1
+            elif (u'whistleblower' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type) and (yourmessage.visualized == False)):
+                countunreadmessages = countunreadmessages + 1
+            elif (u'whistleblower' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type) and (yourmessage.visualized == True)):
+                countreadmessages = countreadmessages + 1
 
-        your_messages = store.find(Message,
-                                   Message.receivertip_id == rtip.id,
-                                   Message.type == u'receiver').count()
-
-        unread_messages = store.find(Message,
-                                     Message.receivertip_id == rtip.id,
-                                     Message.type == u'whistleblower',
-                                     Message.visualized == False).count()
-
-        read_messages = store.find(Message,
-                                   Message.receivertip_id == rtip.id,
-                                   Message.type == u'whistleblower',
-                                   Message.visualized == True).count()
 
         single_tip_sum = dict({
             'id' : rtip.id,
@@ -195,9 +194,9 @@ def get_receiver_tip_list(store, receiver_id, language=GLSetting.memory_copy.def
             'access_counter': rtip.access_counter,
             'files_number': rfiles_n,
             'comments_number': rtip.internaltip.comments.count(),
-            'unread_messages' : unread_messages,
-            'read_messages' : read_messages,
-            'your_messages' : your_messages,
+            'unread_messages' : countunreadmessages,
+            'read_messages' : countreadmessages,
+            'your_messages' : countyourmessages,
             'postpone_superpower': postpone_superpower,
             'can_delete_submission': can_delete_submission,
             'can_modify_tip_receivers': rtip.receiver.can_modify_tip_receivers,

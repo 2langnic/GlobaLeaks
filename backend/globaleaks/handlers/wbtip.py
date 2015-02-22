@@ -270,28 +270,26 @@ def get_receiver_list_wb(store, wb_tip_id, language=GLSetting.memory_copy.defaul
         for rtip in wb_tip.internaltip.receivertips:
 
 
-            your_messages = store.find(Message,
-                                       Message.receivertip_id == rtip.id,
-                                       Message.type == u'whistleblower').count()
-
-            unread_messages = store.find(Message,
-                                         Message.receivertip_id == rtip.id,
-                                         Message.type == u'receiver',
-                                         Message.visualized == False).count()
-
-            read_messages = store.find(Message,
-                                       Message.receivertip_id == rtip.id,
-                                       Message.type == u'receiver',
-                                       Message.visualized == True).count()
+            your_messages = store.find(Message, Message.receivertip_id == rtip.id)
+            countyourmessages = 0
+            countunreadmessages= 0
+            countreadmessages = 0
+            for yourmessage in your_messages:
+                if (u'whistleblower' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type)):
+                    countyourmessages = countyourmessages + 1
+                elif (u'receiver' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type) and (yourmessage.visualized == False)):
+                    countunreadmessages = countunreadmessages + 1
+                elif (u'receiver' == security.decrypt_with_ServerKey(yourmessage.type_nonce,yourmessage.type) and (yourmessage.visualized == True)):
+                    countreadmessages = countreadmessages + 1
 
             # if you change something here, check also 20 lines before!
             receiver_desc = {
                 "name": rtip.receiver.name,
                 "id": rtip.receiver.id,
                 "access_counter" : rtip.access_counter,
-                "unread_messages" : unread_messages,
-                "read_messages" : read_messages,
-                "your_messages" : your_messages,
+                "unread_messages" : countunreadmessages,
+                "read_messages" : countreadmessages,
+                "your_messages" : countyourmessages,
                 "creation_date" : datetime_to_ISO8601(datetime_now()),
                 # XXX ReceiverTip last activity ?
             }
