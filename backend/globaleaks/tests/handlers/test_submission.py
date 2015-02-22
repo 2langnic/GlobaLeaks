@@ -13,12 +13,13 @@ from twisted.internet.defer import inlineCallbacks
 # override GLSetting
 from globaleaks.settings import GLSetting, transact, transact_ro
 from globaleaks.tests import helpers
-from globaleaks import models
+from globaleaks import models, security
 from globaleaks.jobs import delivery_sched
 from globaleaks.handlers import authentication, submission, wbtip
 from globaleaks.handlers.admin import create_context, update_context, create_receiver, get_receiver_list
 from globaleaks.rest import requests, errors
 from globaleaks.models import InternalTip
+from pickle import loads
 
 
 @transact_ro
@@ -143,7 +144,8 @@ class TestSubmission(helpers.TestGLWithPopulatedDB):
         # no rfiles are created for the receivers that have no key
         for i in range(0, 8):
             self.assertTrue(self.rfi[i]['mark'] in [u'not notified', u'skipped'])
-            self.assertTrue(self.rfi[i]['status'] in [u'reference', u'nokey'])
+            # Due to the new encryption always a rfile is created
+            #self.assertTrue(self.rfi[i]['status'] in [u'reference', u'nokey'])
 
         # verify the checksum returned by whistleblower POV, I'm not using
         #  wfv = yield tip.get_files_wb()
@@ -324,6 +326,12 @@ class Test_001_SubmissionCreate(helpers.TestHandlerWithPopulatedDB):
         self.assertEqual(len(self.responses), 1)
         self._handler.validate_message(json.dumps(self.responses[0]), requests.internalTipDesc)
 
+@transact_ro
+def getNonceForSubmission(store,submission_id):
+    internaltip = store.find(InternalTip, InternalTip.id == submission_id).one()
+    nonce = internaltip.wb_steps_nonce
+    return nonce
+
 
 class Test_002_SubmissionInstance(helpers.TestHandlerWithPopulatedDB):
     _handler = submission.SubmissionInstance
@@ -339,7 +347,9 @@ class Test_002_SubmissionInstance(helpers.TestHandlerWithPopulatedDB):
         for submission_id in submissions_ids:
             handler = self.request({})
             yield handler.get(submission_id)
+            nonce = yield getNonceForSubmission(submission_id)
             self.assertTrue(isinstance(self.responses, list))
+            self.responses[0]['wb_steps'] = loads((security.decrypt_binary_with_ServerKey(nonce, self.responses[0]['wb_steps'])))
             self._handler.validate_message(json.dumps(self.responses[0]), requests.internalTipDesc)
 
     @inlineCallbacks

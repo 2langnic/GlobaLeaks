@@ -299,7 +299,8 @@ class Download(BaseHandler):
 
         filelocation = os.path.join(GLSetting.submission_path, rfile['path'])
         
-        cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(rfile['nonce'])), backend=default_backend())
+        if GLSetting.symm_crypt_key_initialized:
+            cipher = Cipher(algorithms.AES(str(GLSetting.mainServerKey)), modes.CTR(b64decode(rfile['nonce'])), backend=default_backend())
         try:
             # https://docs.python.org/2/library/functions.html#open
             # r read
@@ -308,7 +309,10 @@ class Download(BaseHandler):
             #before here was a splitting but due to the different size of ctr encryption mode and the chunk size 
             # now directly the whole input is used
             requestf = open(filelocation, "rb")
-            self.write(cipher.decryptor().update(requestf.read()))
+            if GLSetting.symm_crypt_key_initialized:
+                self.write(cipher.decryptor().update(requestf.read()))
+            else:
+                self.write(requestf.read())
 
         except IOError as srcerr:
             log.err("Unable to open %s: %s " % (filelocation, srcerr.strerror))

@@ -103,6 +103,7 @@ def is_internalfile_associated_with_internaltip(filex):
         return False
     return True
 
+@transact
 def receiverfile_planning(store):
     """
     This function roll over the InternalFile uploaded, extract a path, id and
@@ -119,7 +120,7 @@ def receiverfile_planning(store):
     ifilesmap = {}
 
     for filex in files:
-        if not is_internalfile_associated_with_internaltip(store, filex):
+        if not is_internalfile_associated_with_internaltip(filex):
             continue
 
         # here we select the file which deserve to be processed.
@@ -149,7 +150,7 @@ def receiverfile_planning(store):
                 receiverFileInfo = {
                     'receiver' : receiver_desc,
                     'path' : filex.file_path,
-                    'size' : filex.size,
+                    'size' : int(security.decrypt_with_ServerKey(filex.size_nonce, filex.size)),
                     'status' : u'reference'
                 }
 
@@ -237,7 +238,7 @@ def receiverfile_create(store, if_path, recv_path, status, recv_size, receiver_d
 
         # inherited by previous operation and checks
         receiverfile.file_path = unicode(recv_path)
-        receiverfile.size = recv_size
+        receiverfile.size = ifile.size
         receiverfile.status = unicode(status)
 
         receiverfile.mark = u'not notified'
