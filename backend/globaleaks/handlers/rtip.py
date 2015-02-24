@@ -291,10 +291,9 @@ def addReceivertoTip(store, tip_id, receiverID):
         store.add(newReceiverTip)
         
         # for all Files : Add them to receiverTip
-        
         internalFilesList = store.find(InternalFile,InternalFile.internaltip_id == rtip_old.internaltip.id)
         for internalFile in internalFilesList:
-            create_receiver_file(receiverID, internalFile.id)
+            create_receiver_file(store, receiverID, internalFile.id)
             
     except Exception as err:
         log.err("Error in addReceiverToTip " + str(err))
