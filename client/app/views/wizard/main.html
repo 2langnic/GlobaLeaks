@@ -19,9 +19,9 @@
                 </div>
             </div>
             <div class="pager pull-right">
-                <a class="btn btn-success btn-large" data-ng-click="step = step + 1">
+                <button class="btn btn-success btn-large" data-ng-click="step = step + 1">
                     <span data-translate>Next Step</span>
-                </a>
+                </button>
             </div>
         </div>
         <div id="WizardStep1" data-ng-show="step == 2">
@@ -51,9 +51,9 @@
             </div>
 
             <div class="pager pull-right">
-                <a class="btn btn-success btn-large" data-ng-click="step = step + 1; set_allow_unencrypted()" data-ng-disabled="(encryption === encryptionoptions[1] && !validSymKeyLength)">
+                <button class="btn btn-success btn-large" data-ng-click="step = step + 1; set_allow_unencrypted()" data-ng-disabled="(encryption === encryptionoptions[1] && !validSymKeyLength)">
                     <span data-translate>Next Step</span>
-                </a>
+                </button>
             </div>
         </div>  
 
@@ -273,12 +273,12 @@
                 </div>
             </div>
             <div class="pager pull-right">
-                <a class="btn btn-success btn-large" data-ng-click="step = step - 1">
+                <button class="btn btn-success btn-large" data-ng-click="step = step - 1">
                     <span data-translate>Previous Step</span>
-                </a>
-                <a class="btn btn-success btn-large" data-ng-click="step = step + 1" data-ng-disabled="wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor) || (encryption === encryptionoptions[1] && !validSymKeyLength)">
+                </button>
+                <button class="btn btn-success btn-large" data-ng-click="step = step + 1" data-ng-disabled="wizard.$invalid || (!admin.node.allow_unencrypted && !receiver.gpg_key_armor) || (encryption === encryptionoptions[1] && !validSymKeyLength)">
                     <span data-translate>Next Step</span>
-                </a>
+                </button>
             </div>
         </div>
 
@@ -296,9 +296,9 @@
                 </div>
 
                 <div class="pager pull-right">
-                    <a class="btn btn-success btn-large" data-ng-click="finish()">
+                    <button class="btn btn-success btn-large" data-ng-click="finish()">
                         <span data-translate>Go to admin interface</span>
-                    </a>  
+                    </button>  
                 </div>
             </div>
 

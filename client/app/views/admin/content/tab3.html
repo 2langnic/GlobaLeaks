@@ -25,14 +25,14 @@
                 <span class="progress-bar" style="width: 0%"></span>
               </span>
             </span>
-            <a class="btn btn-primary" data-ng-class="{disabled: disabled}" data-ng-href="{{'/l10n/' + language.code + '.json'}}" download="{{language.code + '.json'}}">
+            <button class="btn btn-primary" data-ng-class="{disabled: disabled}" data-ng-href="{{'/l10n/' + language.code + '.json'}}" download="{{language.code + '.json'}}">
               <span class="glyphicon glyphicon-download"></span>
               <span data-translate>Download</span>
-            </a>
-            <a class="btn btn-danger" data-ng-class="{disabled: disabled}" data-ng-click="perform_delete('/l10n/' + language.code + '.json')">
+            </button>
+            <button class="btn btn-danger" data-ng-class="{disabled: disabled}" data-ng-click="perform_delete('/l10n/' + language.code + '.json')">
               <span class="glyphicon glyphicon-trash"></span>
               <span data-translate>Reset</span>
-            </a>
+            </button>
           </div>
         </div>
       </div>
