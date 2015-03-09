@@ -65,8 +65,8 @@ GLClient.controller('TipCtrl', ['$scope', '$http', '$route', '$location', '$moda
 
     }]);
 
-GLClient.controller('TipWBCtrl', ['$scope', '$http', '$route', '$location', '$modal', 'Tip', 'ReceiverTips',
-    function ($scope, $http, $route, $location, $modal, Tip, ReceiverTips) {
+GLClient.controller('TipWBCtrl', ['$scope', '$http', '$route', '$location', '$modal', 'Tip', 'ReceiverTips', '$rootScope',
+    function ($scope, $http, $route, $location, $modal, Tip, ReceiverTips, $rootScope) {
    }]);
 
 ModalDeleteTipCtrl = ['$scope', '$http', '$route', '$location', '$modalInstance', 'tip_id', 'global_delete',
