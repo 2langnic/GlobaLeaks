@@ -363,7 +363,7 @@ class AuthenticationHandler(BaseHandler):
                 GLSetting.failed_login_attempts += 1
                 raise errors.InvalidAuthRequest
 
-            new_session_id = self.generate_session(wbtip_id, role, 'enabled')
+            new_session_id = self.generate_session(wbtip_id, role, 'enabled',xsrftoken)
 
             auth_answer = {
                 'role': 'admin',
@@ -381,7 +381,7 @@ class AuthenticationHandler(BaseHandler):
                 GLSetting.failed_login_attempts += 1
                 raise errors.InvalidAuthRequest
 
-            new_session_id = self.generate_session(receiver_id, role, status)
+            new_session_id = self.generate_session(receiver_id, role, status,xsrftoken)
 
             auth_answer = {
                 'role': 'receiver',
