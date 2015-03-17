@@ -148,8 +148,7 @@ class GLHTTPServer(HTTPConnection):
                          limit))
 
                 # In HTTP Protocol errors need to be managed differently than handlers
-                raise errors.HTTPRawLimitReach
-
+                raise errors.HTTPRawLimitReach("File to large")
             if self.content_length > 0:
                 self.setRawMode()
                 return
@@ -571,6 +570,9 @@ class BaseHandler(RequestHandler):
 
         try:
             session = GLSetting.sessions[session_id]
+            token = self.request.headers.get("X-XSRF-TOKEN")
+            if not token == session.xsrftoken:
+                return None
         except KeyError:
             return None
         return session

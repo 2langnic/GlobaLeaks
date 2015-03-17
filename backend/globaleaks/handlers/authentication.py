@@ -26,7 +26,7 @@ reactor = None
 
 class GLSession(tempobj.TempObj):
 
-    def __init__(self, user_id, user_role, user_status):
+    def __init__(self, user_id, user_role, user_status,xsrftoken):
         self.user_role = user_role
         self.user_id = user_id
         self.user_role = user_role
@@ -34,7 +34,7 @@ class GLSession(tempobj.TempObj):
         tempobj.TempObj.__init__(self,
                                  GLSetting.sessions,
                                  rstr.xeger(r'[A-Za-z0-9]{42}'),
-                                 GLSetting.defaults.lifetimes[user_role],
+                                 GLSetting.defaults.lifetimes[user_role], xsrftoken,
                                  reactor)
 
     def __repr__(self):
@@ -275,7 +275,7 @@ class AuthenticationHandler(BaseHandler):
     """
     session_id = None
 
-    def generate_session(self, user_id, role, status):
+    def generate_session(self, user_id, role, status, xsrftoken):
         """
         Args:
             role: can be either 'admin', 'wb' or 'receiver'
@@ -284,7 +284,8 @@ class AuthenticationHandler(BaseHandler):
                 case of an admin it will be set to 'admin', in the case of the
                 'wb' it will be the whistleblower id.
         """
-        session = GLSession(user_id, role, status)
+        print "generate session"
+        session = GLSession(user_id, role, status, xsrftoken)
         self.session_id = session.id
         return self.session_id
 
@@ -312,6 +313,7 @@ class AuthenticationHandler(BaseHandler):
         """
         This is the /login handler expecting login/password/role,
         """
+        xsrftoken = self.request.headers.get("X-XSRF-TOKEN")
         request = self.validate_message(self.request.body, requests.authDict)
 
         username = request['username']
@@ -343,7 +345,7 @@ class AuthenticationHandler(BaseHandler):
             if authorized_username is False:
                 GLSetting.failed_login_attempts += 1
                 raise errors.InvalidAuthRequest
-            new_session_id = self.generate_session(authorized_username, role, status)
+            new_session_id = self.generate_session(authorized_username, role, status, xsrftoken)
 
             auth_answer = {
                 'role': 'admin',

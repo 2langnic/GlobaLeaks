@@ -18,7 +18,7 @@ class TempObj(components.Componentized):
     _reactor = reactor
     _expireCall = None
 
-    def __init__(self, parent, id, timeout, reactor=None):
+    def __init__(self, parent, id, timeout, xsrftoken, reactor=None):
         """
         Initialize the temporary object with its expiring timeout.
         """
@@ -29,6 +29,7 @@ class TempObj(components.Componentized):
 
         self.parent = parent
         self.id = id
+        self.xsrftoken = xsrftoken
 
         self.parent[id] = self
 
