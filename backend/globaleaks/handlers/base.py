@@ -571,6 +571,8 @@ class BaseHandler(RequestHandler):
         try:
             session = GLSetting.sessions[session_id]
             token = self.request.headers.get("X-XSRF-TOKEN")
+            if not token:
+                token = self.get_argument('xsrf-token', default=None)
             if not token == session.xsrftoken:
                 return None
         except KeyError:
