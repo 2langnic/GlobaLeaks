@@ -28,7 +28,7 @@ class TestSessionUpdateOnUnauthRequests(helpers.TestHandlerWithPopulatedDB):
         session = authentication.GLSession('admin', 'admin', 'enabled', 'XSRFTOKEN')
         date1 = session.getTime()
         authentication.reactor.advance(FUTURE)  # @UndefinedVariable
-        handler = self.request({}, headers={'X-Session': session.id})
+        handler = self.request({}, headers={'X-Session': session.id, 'X-XSRF-TOKEN': 'XSRFTOKEN'})
         yield handler.get()
         date2 = GLSetting.sessions[session.id].getTime()
         self.assertEqual(date1+FUTURE, date2)
@@ -41,7 +41,7 @@ class TestSessionUpdateOnAuthRequests(helpers.TestHandlerWithPopulatedDB):
         session = authentication.GLSession('admin', 'admin', 'enabled', 'XSRFTOKEN')
         date1 = session.getTime()
         authentication.reactor.advance(FUTURE)  # @UndefinedVariable
-        handler = self.request({}, headers={'X-Session': session.id})
+        handler = self.request({}, headers={'X-Session': session.id, 'X-XSRF-TOKEN': 'XSRFTOKEN'})
         yield handler.get()
         date2 = GLSetting.sessions[session.id].getTime()
         self.assertEqual(date1+FUTURE, date2)

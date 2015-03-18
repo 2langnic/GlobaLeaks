@@ -175,7 +175,7 @@ class EventTrack(TempObj):
                          EventTrackQueue.queue,
                          self.event_id,
                          # seconds of validity:
-                         ANOMALY_WINDOW_SECONDS,
+                         ANOMALY_WINDOW_SECONDS, 'XSRFTOKEN',
                          reactor)
 
         self.expireCallbacks.append(self.synthesis)

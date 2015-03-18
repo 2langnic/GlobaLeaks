@@ -19,7 +19,7 @@ class TestTempObj(unittest.TestCase):
         obj = {}
 
         for x in range(1, 4):
-            obj[x] = TempObj(objs_dict, uuid4(), x, c)
+            obj[x] = TempObj(objs_dict, uuid4(), x,'XSRFTOKEN', c)
             self.failUnless(interfaces.IDelayedCall.providedBy(obj[x]._expireCall))
             self.assertEqual(len(obj), x)
 
@@ -38,7 +38,7 @@ class TestTempObj(unittest.TestCase):
         c = task.Clock() # deterministic clock
 
         objs_dict = {}
-        obj = TempObj(objs_dict, uuid4(), 2, c)
+        obj = TempObj(objs_dict, uuid4(), 2, 'XSRFTOKEN', c)
         obj.touch()
         c.advance(1)
         obj.touch()
@@ -57,7 +57,7 @@ class TestTempObj(unittest.TestCase):
         c = task.Clock() # deterministic clock
 
         objs_dict = {}
-        obj = TempObj(objs_dict, uuid4(), 1, c)
+        obj = TempObj(objs_dict, uuid4(), 1,'XSRFTOKEN', c)
         obj.expire()
         self.assertIsNone(obj._expireCall)
 
@@ -70,7 +70,7 @@ class TestTempObj(unittest.TestCase):
 
         events = []
         objs_dict = {}
-        obj = TempObj(objs_dict, uuid4(), 2, c)
+        obj = TempObj(objs_dict, uuid4(), 2,'XSRFTOKEN', c)
 
         for x in range(0, 3):
             obj.notifyOnExpire(lambda: events.append((x)))
