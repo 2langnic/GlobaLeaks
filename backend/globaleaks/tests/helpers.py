@@ -552,6 +552,7 @@ class TestHandler(TestGLWithPopulatedDB):
         if role:
             session = authentication.GLSession(user_id, role, 'enabled', 'XSRFTOKEN')
             handler.request.headers['X-Session'] = session.id
+            handler.request.headers['X-XSRF-TOKEN'] = 'XSRFTOKEN'
         return handler
 
 class TestHandlerWithPopulatedDB(TestHandler):
