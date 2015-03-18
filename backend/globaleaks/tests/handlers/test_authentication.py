@@ -25,7 +25,7 @@ class TestSessionUpdateOnUnauthRequests(helpers.TestHandlerWithPopulatedDB):
 
     @inlineCallbacks
     def test_001_successful_session_update_on_unauth_request(self):
-        session = authentication.GLSession('admin', 'admin', 'enabled')
+        session = authentication.GLSession('admin', 'admin', 'enabled', 'XSRFTOKEN')
         date1 = session.getTime()
         authentication.reactor.advance(FUTURE)  # @UndefinedVariable
         handler = self.request({}, headers={'X-Session': session.id})
@@ -38,7 +38,7 @@ class TestSessionUpdateOnAuthRequests(helpers.TestHandlerWithPopulatedDB):
 
     @inlineCallbacks
     def test_001_successful_session_update_on_auth_request(self):
-        session = authentication.GLSession('admin', 'admin', 'enabled')
+        session = authentication.GLSession('admin', 'admin', 'enabled', 'XSRFTOKEN')
         date1 = session.getTime()
         authentication.reactor.advance(FUTURE)  # @UndefinedVariable
         handler = self.request({}, headers={'X-Session': session.id})
