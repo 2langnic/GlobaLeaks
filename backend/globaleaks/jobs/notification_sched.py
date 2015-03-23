@@ -621,10 +621,10 @@ class NotificationSchedule(GLJob):
         Only the Models with the 'notification_status' can track which elements has been
         notified or not.
         """
-        #try:
-        if GLSetting.notification_temporary_disable:
-            log.err("Node has Notification temporary disabled")
-            return
+        try:
+            if GLSetting.notification_temporary_disable:
+                log.err("Node has Notification temporary disabled")
+                return
 
             limit_counter = 0
             (tip_events, limit_counter) = yield self.create_tip_notification_events(limit_counter)
@@ -632,10 +632,10 @@ class NotificationSchedule(GLJob):
             (file_events, limit_counter) = yield self.create_file_notification_events(limit_counter)
             (message_events, limit_counter) = yield self.create_message_notification_events(limit_counter)
 
-        #except Exception as excep:
-            #  log.err("Error in notification event creation: %s" % excep)
-            #  log.debug(sys.exc_info())
-            # return
+        except Exception as excep:
+            log.err("Error in notification event creation: %s" % excep)
+            log.debug(sys.exc_info())
+            return
 
         try:
             if tip_events:
