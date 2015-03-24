@@ -19,7 +19,7 @@ from globaleaks.utils.utility import log, utc_future_date, datetime_now, \
 from globaleaks.utils.structures import Rosetta
 from globaleaks.settings import transact, transact_ro, GLSetting
 from globaleaks.models import Node, Comment, ReceiverFile, Message, InternalTip,\
-    ReceiverTip, InternalFile
+    ReceiverTip, InternalFile, ReceiverInternalTip
 from globaleaks.rest import errors
 from globaleaks.security import access_tip
 
@@ -262,7 +262,6 @@ def postpone_expiration_date(store, user_id, tip_id):
 
 @transact
 def addReceivertoTip(store, tip_id, receiverID):
-    print "entering addReceiverToTip"
     # Check if the receiver is not already a receiver of the tip
     try:
         rtip_check = store.find(ReceiverTip, ReceiverTip.id == unicode(tip_id)).one()
@@ -295,6 +294,15 @@ def addReceivertoTip(store, tip_id, receiverID):
         for internalFile in internalFilesList:
             create_receiver_file(store, receiverID, internalFile.id)
             
+        # Add reference between internaltip and receiver
+        # Perhaps the double saving could be changed (Internaltip - > Receivers and ReceiverTip -> Internaltip)
+        log.debug("Add reference between Internaltip and receiver (needed for messages / comments)")
+        check = store.find(ReceiverInternalTip,
+            ( ReceiverInternalTip.receiver_id == receiverID,
+              ReceiverInternalTip.internaltip_id == tip_id)).one()
+        if not check:
+            newReceiverTip.internaltip.receivers.add(newReceiverTip.receiver)
+            
     except Exception as err:
         log.err("Error in addReceiverToTip " + str(err))
         return False
@@ -317,6 +325,20 @@ def removeReceiverFromTip(store, tip_id, receiverID):
         # if the Receiver is not in the tip just go back
         if not isReceiverInTip:
             return True
+        
+        # Remove ReceiverFile(s)
+        receiverFiles = store.find(ReceiverFile, ReceiverFile.internaltip_id == internaltip.id,
+                      ReceiverFile.receiver_id == receiverID)
+        log.debug("Removing ReceiverFiles")
+        for receiverFile in receiverFiles:
+            store.remove(receiverFile)
+        
+        # Remove references from Receiver to Internaltip
+        reference = store.find(ReceiverInternalTip, ReceiverInternalTip.internaltip_id == internaltip.id,
+                      ReceiverInternalTip.receiver_id == receiverID).one()
+        log.debug("Removing reference from Internaltip")
+        store.remove(reference)
+        
         store.remove(rtip_to_delete)
         
         if (internaltip.receivertips.count() == 0):
